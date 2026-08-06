@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Polaris — Painel de Atendimento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ---- Tokens (paleta degradê azul/ciano TOTVS) ---- */
+    --navy-950: #061019;
+    --navy-900: #0a1a2b;
+    --navy-800: #0f2438;
+    --cyan-500: #00d9f5;
+    --cyan-400: #35e6ff;
+    --teal-600: #0e93a8;
+    --teal-700: #0b7488;
+    --indigo-600: #0e93a8;   /* alias mantido p/ compatibilidade com regras existentes */
+    --indigo-700: #0b7488;
+    --violet-800: #0f2438;
+    --violet-900: #0a1a2b;
+    --orange-500: #f5a623;
+    --orange-400: #ffbd4a;
+
+    --surface: #ffffff;
+    --canvas: #eef6f8;
+    --canvas-edge: #dff0f4;
+    --ink: #0d1b26;
+    --ink-soft: #55707a;
+    --ink-faint: #8aa2ab;
+    --line: #d9ecf0;
+
+    --green-ok: #1e9e6a;
+    --green-ok-soft: #e2f6ec;
+    --amber: #d98c1b;
+    --amber-soft: #fdf0d9;
+    --red-crit: #d13b3b;
+    --red-crit-soft: #fbe3e3;
+    --grey-off: #8a8fa3;
+
+    --shadow-sm: 0 1px 2px rgba(6, 16, 25, 0.06), 0 1px 1px rgba(6, 16, 25, 0.05);
+    --shadow-md: 0 4px 14px rgba(6, 16, 25, 0.09), 0 1px 3px rgba(6, 16, 25, 0.06);
+    --shadow-lg: 0 18px 40px rgba(6, 16, 25, 0.18), 0 4px 10px rgba(6, 16, 25, 0.08);
+
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+
+    --font-display: "Manrope", "Inter", "Segoe UI", sans-serif;
+    --font-body: "Inter", "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    background-image: radial-gradient(circle at 12% 0%, #dff3f7 0%, rgba(223,243,247,0) 42%);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+  .page {
+    width: 100%; height: 100vh; margin: 0 auto;
+    display: flex; flex-direction: column;
+    padding: clamp(12px, 1.4vw, 22px) clamp(16px, 2.2vw, 36px) clamp(14px, 1.6vw, 24px);
+    gap: clamp(10px, 1.1vw, 15px);
+  }
+
+  /* ===================== Header ===================== */
+  .header {
+    display: flex; align-items: center; gap: 16px; flex: 0 0 auto;
+    padding: clamp(11px, 1.1vw, 16px) clamp(16px, 1.8vw, 26px);
+    border-radius: 16px;
+    background: linear-gradient(90deg, var(--cyan-500) 0%, var(--teal-600) 30%, var(--navy-900) 62%, var(--navy-950) 100%);
+    color: white; box-shadow: var(--shadow-lg);
+    position: relative; overflow: hidden;
+  }
+  .header::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(420px 160px at 88% -20%, rgba(0,217,245,0.25), transparent 70%);
+  }
+  .header__brand { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; flex: 0 0 auto; }
+  .header__mark {
+    width: clamp(34px, 2.6vw, 42px); height: clamp(34px, 2.6vw, 42px); border-radius: 11px; flex-shrink: 0; position: relative;
+    background: linear-gradient(155deg, var(--cyan-500), var(--navy-900));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18), var(--shadow-sm);
+  }
+  .header__mark svg { position: absolute; inset: 0; margin: auto; width: 46%; height: 46%; }
+  .header h1 { margin: 0; font-family: var(--font-display); font-size: clamp(20px, 2.1vw, 30px); font-weight: 800; letter-spacing: 0.2px; }
+  .header__subtitle { margin: 2px 0 0; font-size: clamp(13px, 1.05vw, 16px); color: rgba(255,255,255,0.72); font-weight: 500; }
+
+  .header__right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: 1 1 auto; position: relative; z-index: 1; min-width: 0; }
+  .header__chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .header__updated { margin: 0; font-size: 10.5px; color: rgba(255,255,255,0.45); font-weight: 600; }
+
+  .chip {
+    font-size: 13.5px; font-weight: 600; background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.95);
+    padding: 7px 14px; border-radius: 999px; white-space: nowrap;
+  }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 700;
+    background: rgba(255,255,255,0.14); padding: 7px 14px 7px 11px; border-radius: 999px; white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--grey-off); flex-shrink: 0; }
+  .status-pill[data-online="true"] .status-dot { background: #37e29a; box-shadow: 0 0 0 3px rgba(55,226,154,0.25); animation: pulse-dot 1.8s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%, 100% { box-shadow: 0 0 0 3px rgba(55,226,154,0.25); } 50% { box-shadow: 0 0 0 5px rgba(55,226,154,0.08); } }
+
+  .icon-btn {
+    width: clamp(36px, 2.6vw, 42px); height: clamp(36px, 2.6vw, 42px); border-radius: 12px; flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.1); color: white;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: background .15s ease, transform .1s ease; position: relative; z-index: 1;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.2); }
+  .icon-btn:active { transform: scale(0.93); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .icon-btn.is-active-tab { background: rgba(255,255,255,0.3); }
+
+  /* ===================== Panels ===================== */
+  .panel { display: none; min-height: 0; }
+  .panel.is-active { display: flex; flex-direction: column; gap: clamp(10px, 1.1vw, 15px); flex: 1 1 auto; min-height: 0; }
+  #panel-config.is-active { overflow-y: auto; padding-right: 4px; }
+
+  .config-head { display: flex; align-items: center; justify-content: space-between; flex: 0 0 auto; padding: 2px 2px 0; }
+  .config-head h2 { margin: 0; font-size: 16px; font-family: var(--font-display); font-weight: 800; color: var(--ink); }
+  .config-head .link-btn { font-size: 12.5px; }
+
+  /* ===================== Hero row ===================== */
+  .grid-top { display: grid; grid-template-columns: clamp(250px, 19vw, 340px) 1fr; gap: clamp(10px, 1.1vw, 15px); flex: 1 1 auto; min-height: 0; }
+  @media (max-width: 860px) { .grid-top { grid-template-columns: 1fr; } }
+
+  .hero-col { display: flex; flex-direction: column; gap: clamp(10px, 1.1vw, 15px); min-height: 0; }
+
+  .waiting-card {
+    border-radius: var(--radius-lg); padding: clamp(16px, 1.6vw, 24px) clamp(18px, 1.8vw, 26px); color: white; box-shadow: var(--shadow-lg);
+    background: linear-gradient(150deg, var(--indigo-600) 0%, var(--violet-900) 100%);
+    position: relative; overflow: hidden; flex: 0 0 auto;
+  }
+  .waiting-card::before {
+    content: ""; position: absolute; width: 190px; height: 190px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.14), transparent 70%);
+    top: -70px; right: -60px;
+  }
+  .waiting-card__label { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: .7px; opacity: .88; font-weight: 700; position: relative; z-index: 1; }
+  .waiting-card__value { margin: 8px 0 0; font-family: var(--font-display); font-size: clamp(58px, 6.6vw, 108px); font-weight: 800; line-height: 1; position: relative; z-index: 1; }
+
+  .mood-card {
+    border-radius: var(--radius-lg); padding: clamp(16px, 1.6vw, 24px); color: white; box-shadow: var(--shadow-lg);
+    background: linear-gradient(150deg, var(--indigo-600), var(--violet-900));
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    flex: 1 1 auto; min-height: 0; transition: background .4s ease; gap: 4px;
+  }
+  .mood-card[data-level="warning"] { background: linear-gradient(150deg, #e0a53a, var(--amber)); }
+  .mood-card[data-level="critical"] { background: linear-gradient(150deg, #e05f5f, var(--red-crit)); }
+  .mood-card[data-level="offline"] { background: linear-gradient(150deg, #8a90a8, #565c74); }
+  .mood-card__icon { width: clamp(46px, 4.4vw, 72px); height: clamp(46px, 4.4vw, 72px); margin-bottom: 4px; opacity: 0.95; }
+  .mood-card__title { margin: 0; font-family: var(--font-display); font-size: clamp(19px, 1.8vw, 27px); font-weight: 800; }
+  .mood-card__message { margin: 4px 0 0; font-size: clamp(14px, 1.15vw, 17px); opacity: .9; max-width: 280px; line-height: 1.45; }
+
+  /* ===================== Stat grid (3x2) ===================== */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: clamp(8px, 0.9vw, 13px); min-height: 0; }
+  @media (max-width: 640px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .stat {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md);
+    padding: clamp(12px, 1.2vw, 18px); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;
+    min-height: 0;
+  }
+  .stat__head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .stat__icon {
+    width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #dff6fa, #bdeaf3); color: var(--indigo-700); flex-shrink: 0;
+    transition: background .25s ease, color .25s ease;
+  }
+  .stat__icon svg { width: 18px; height: 18px; }
+  .stat__label-wrap p { margin: 0; }
+  .stat__label { font-size: 14.5px; color: var(--ink); font-weight: 700; }
+  .stat__sublabel { font-size: 12.5px; color: var(--ink-faint); font-weight: 500; }
+  .stat__value { margin: 0; font-family: var(--font-display); font-size: clamp(30px, 3.3vw, 50px); font-weight: 800; color: var(--ink); transition: color .25s ease; }
+  .stat__value-secondary { font-size: 17px; color: var(--ink-faint); font-weight: 600; margin-left: 3px; }
+
+  .stat.is-good .stat__value { color: var(--green-ok); }
+  .stat.is-good .stat__icon { background: linear-gradient(135deg, var(--green-ok-soft), #c9ecd9); color: var(--green-ok); }
+  .stat.is-warn .stat__value { color: var(--amber); }
+  .stat.is-warn .stat__icon { background: linear-gradient(135deg, var(--amber-soft), #f9dfa8); color: var(--amber); }
+  .stat.is-bad .stat__value { color: var(--red-crit); }
+  .stat.is-bad .stat__icon { background: linear-gradient(135deg, var(--red-crit-soft), #f6c9c9); color: var(--red-crit); }
+
+  /* ===================== Volume do dia ===================== */
+  .target-bar {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md);
+    padding: clamp(10px, 1vw, 15px) clamp(16px, 1.6vw, 22px); box-shadow: var(--shadow-sm);
+    display: flex; align-items: center; gap: 18px; flex: 0 0 auto;
+  }
+  @media (max-width: 640px) { .target-bar { flex-direction: column; align-items: stretch; gap: 10px; } }
+  .target-bar__label-block { flex: 0 0 auto; min-width: 168px; }
+  .target-bar__label { margin: 0; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--indigo-700); }
+  .target-bar__hint { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-faint); }
+  .target-bar__count { margin: 0 0 0 auto; font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--ink); flex-shrink: 0; }
+  .target-bar__count span.dim { color: var(--ink-faint); font-weight: 600; font-size: 17px; }
+  .target-bar__track-wrap { flex: 1 1 auto; }
+  .progress-track { height: 11px; background: var(--canvas-edge); border-radius: 999px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--cyan-500), var(--teal-700)); border-radius: 999px; transition: width .5s ease, background .5s ease; }
+  .progress-fill.is-complete { background: linear-gradient(90deg, var(--orange-500), var(--orange-400)); }
+  .target-bar__status { margin: 6px 0 0; font-size: 13px; color: var(--ink-soft); }
+
+  .error-banner { display: flex; gap: 8px; align-items: center; padding: 9px 14px; background: var(--red-crit-soft); color: var(--red-crit); border-radius: var(--radius-sm); font-size: 13.5px; font-weight: 600; flex: 0 0 auto; }
+
+  /* ===================== Assuntos semelhantes na fila ===================== */
+  .topics-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: clamp(12px, 1.3vw, 18px) clamp(14px, 1.5vw, 20px); box-shadow: var(--shadow-sm); flex: 0 0 auto; }
+  .topics-card__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .topics-card__head h2 { margin: 0; font-size: 16px; font-family: var(--font-display); color: var(--ink); font-weight: 800; }
+  .topics-card__hint { margin: 2px 0 0; font-size: 12px; color: var(--ink-faint); font-weight: 500; }
+  .topics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  .topic-pill {
+    display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: var(--radius-md);
+    background: var(--canvas); border: 1px solid var(--line);
+  }
+  .topic-pill__count { font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--indigo-700); line-height: 1; }
+  .topic-pill__count small { font-size: 14px; font-weight: 700; color: var(--ink-faint); }
+  .topic-pill__label { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .topic-pill--critical { background: var(--red-crit-soft); border-color: #f3cccc; }
+  .topic-pill--critical .topic-pill__count { color: var(--red-crit); }
+  .topics-empty { font-size: 13px; color: var(--ink-faint); line-height: 1.5; padding: 6px 2px; }
+
+  /* ===================== Agent panel ===================== */
+  .agent-section { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: clamp(12px, 1.3vw, 18px) clamp(14px, 1.5vw, 20px); box-shadow: var(--shadow-sm); flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+  .agent-section__head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; flex: 0 0 auto; }
+  .agent-section__head h2 { margin: 0; font-size: 18px; font-family: var(--font-display); color: var(--ink); font-weight: 800; }
+  .agent-section__hint { margin: 0; font-size: 13px; color: var(--ink-faint); font-weight: 500; }
+  .table-wrap { overflow-y: auto; flex: 1 1 auto; min-height: 0; }
+  .agent-table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .agent-table thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; }
+  .agent-table th { text-align: left; padding: 10px 12px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; color: var(--ink-faint); border-bottom: 1px solid var(--line); }
+  .agent-table td { padding: 12px 12px; border-bottom: 1px solid var(--line); color: var(--ink); }
+  .agent-table tr:last-child td { border-bottom: none; }
+  .agent-table td.tempo-warning { color: var(--amber); font-weight: 700; }
+  .agent-table td.tempo-critical { color: var(--red-crit); font-weight: 700; }
+  .agent-table a { color: var(--indigo-700); text-decoration: none; font-weight: 700; }
+  .agent-table a:hover { text-decoration: underline; }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 18px 10px; text-align: center; color: var(--ink-faint); gap: 6px; }
+  .empty-state svg { width: 34px; height: 34px; opacity: .55; margin-bottom: 2px; }
+  .empty-state strong { color: var(--ink-soft); font-size: 13px; font-weight: 700; }
+  .empty-state span { font-size: 11.5px; }
+
+  /* ===================== Config cards ===================== */
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+  .card__title { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+  .card__icon {
+    width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    background: linear-gradient(135deg, #ece8fc, #ddd6fb); color: var(--indigo-700);
+  }
+  .card__icon svg { width: 16px; height: 16px; }
+  .card__title h2 { margin: 0; font-size: 14.5px; font-family: var(--font-display); color: var(--ink); font-weight: 800; }
+  .card__note { font-size: 12px; color: var(--indigo-700); background: #f1eefd; border: 1px solid #ded5fa; border-radius: var(--radius-sm); padding: 10px 13px; margin: 0 0 16px; line-height: 1.5; font-weight: 500; }
+
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-weight: 700; font-size: 13px; color: var(--ink); margin-bottom: 5px; }
+  .field__hint { margin: 0 0 8px; font-size: 11.5px; color: var(--ink-faint); line-height: 1.45; }
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; }
+  @media (max-width: 480px) { .field-grid { grid-template-columns: 1fr; } }
+  .field-grid .field { margin-bottom: 0; }
+
+  .pill-static { display: inline-block; padding: 6px 15px; border-radius: 999px; background: linear-gradient(120deg, var(--indigo-600), var(--violet-800)); color: white; font-size: 12.5px; font-weight: 700; margin-bottom: 6px; }
+
+  input[type="number"], input[type="text"] { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); font-size: 14px; font-family: var(--font-body); color: var(--ink); background: var(--canvas); }
+  input:focus { outline: 2px solid var(--indigo-600); outline-offset: 1px; }
+
+  .queue-list { max-height: 190px; overflow-y: auto; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 6px 4px; background: var(--canvas); }
+  .queue-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 7px; font-size: 12.5px; }
+  .queue-item:hover { background: rgba(91,61,240,0.06); }
+  .queue-item input { accent-color: var(--indigo-600); width: 15px; height: 15px; flex-shrink: 0; }
+  .queue-item label { margin: 0; font-weight: 400; }
+
+  .field__row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .link-btn { background: none; border: none; color: var(--indigo-700); font-weight: 700; font-size: 11.5px; cursor: pointer; padding: 0; }
+  .link-btn:hover { text-decoration: underline; }
+  .dot-sep { margin: 0 5px; color: var(--ink-faint); }
+
+  .field--switch { display: flex; align-items: center; justify-content: space-between; }
+  .switch { position: relative; display: inline-block; }
+  .switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .switch__track { display: inline-block; width: 40px; height: 22px; background: #d8d9e6; border-radius: 999px; position: relative; cursor: pointer; transition: background .2s ease; }
+  .switch__thumb { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: white; border-radius: 50%; transition: transform .2s ease; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .switch input:checked + .switch__track { background: var(--green-ok); }
+  .switch input:checked + .switch__track .switch__thumb { transform: translateX(18px); }
+
+  .actions { display: flex; gap: 10px; margin-top: 4px; padding-bottom: 4px; }
+  .btn { border: none; border-radius: var(--radius-sm); padding: 11px 18px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: var(--font-body); }
+  .btn--primary { background: linear-gradient(120deg, var(--indigo-600), var(--violet-800)); color: white; box-shadow: 0 4px 14px rgba(74,47,209,0.28); }
+  .btn--primary:hover { filter: brightness(1.06); }
+  .btn--ghost { background: transparent; color: var(--ink-soft); border: 1px solid var(--line); }
+  .btn--ghost:hover { background: var(--canvas); }
+  .saved-msg { margin: 14px 0 0; font-size: 13px; color: var(--green-ok); font-weight: 700; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .status-pill[data-online="true"] .status-dot { animation: none; }
+  }
+
+  /* ===================== Inteligência & Relatórios ===================== */
+  #panel-reports.is-active { overflow-y: auto; padding-right: 4px; }
+
+  .reports-hint { margin: 0 0 12px; font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
+  .reports-footnote { margin: 8px 0 0; font-size: 11.5px; color: var(--ink-soft); }
+  .reports-loading, .reports-empty { font-size: 12.5px; color: var(--ink-soft); padding: 10px 0; }
+
+  .comparisons-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .comparison-card {
+    border: 1px solid var(--line); border-radius: var(--radius-md); padding: 12px 14px; background: var(--canvas);
+  }
+  .comparison-card__label { margin: 0 0 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--teal-700); }
+  .comparison-card__value { margin: 0; font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--ink); }
+  .comparison-card__delta { margin: 4px 0 0; font-size: 12px; font-weight: 700; }
+  .comparison-card__delta[data-trend="up"] { color: var(--red-crit); }
+  .comparison-card__delta[data-trend="down"] { color: var(--green-ok); }
+  .comparison-card__delta[data-trend="flat"] { color: var(--ink-soft); }
+  .comparison-card__empty { font-size: 12px; color: var(--ink-faint); font-style: italic; }
+
+  .heatmap-wrap { overflow-x: auto; }
+  .heatmap-grid { display: grid; grid-template-columns: 46px repeat(7, 1fr); gap: 3px; min-width: 480px; }
+  .heatmap-cell {
+    font-size: 10.5px; text-align: center; padding: 6px 2px; border-radius: 5px; color: var(--ink-soft);
+    background: var(--canvas-edge);
+  }
+  .heatmap-cell.heatmap-head { font-weight: 700; color: var(--ink); background: transparent; }
+  .heatmap-cell.heatmap-hour { font-weight: 700; color: var(--ink); background: transparent; text-align: right; padding-right: 6px; }
+  .heatmap-cell.heatmap-empty { background: transparent; color: var(--ink-faint); }
+
+  .forecast-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .forecast-table th { text-align: left; padding: 7px 10px; font-size: 11px; text-transform: uppercase; color: var(--teal-700); border-bottom: 1px solid var(--line); }
+  .forecast-table td { padding: 7px 10px; border-bottom: 1px solid var(--line); }
+  .forecast-table tr:last-child td { border-bottom: none; }
+  .forecast-table td.diff-up { color: var(--red-crit); font-weight: 700; }
+  .forecast-table td.diff-down { color: var(--green-ok); font-weight: 700; }
+  .forecast-table tr.is-current-hour td { background: var(--canvas-edge); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header__brand">
+      <span class="header__mark">
+        <svg viewBox="0 0 18 18" fill="none">
+          <circle cx="3.5" cy="14.5" r="1.6" fill="#f5a623"/>
+          <circle cx="9" cy="9" r="1.9" fill="#ffffff"/>
+          <circle cx="14.5" cy="3.5" r="1.6" fill="#f5a623"/>
+          <line x1="3.5" y1="14.5" x2="9" y2="9" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+          <line x1="9" y1="9" x2="14.5" y2="3.5" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+        </svg>
+      </span>
+      <div>
+        <h1>Polaris</h1>
+        <p class="header__subtitle">Painel de atendimento em tempo real</p>
+      </div>
+    </div>
+
+    <div class="header__right">
+      <div class="header__chips">
+        <span class="chip">Vertical: Food</span>
+        <span class="chip" id="chipQueues">Todas as filas</span>
+        <span class="status-pill" id="connStatusPill" data-online="false">
+          <span class="status-dot"></span>
+          <span id="connStatus">verificando…</span>
+        </span>
+      </div>
+      <p class="header__updated" id="updatedAt">–</p>
+    </div>
+
+    <button type="button" class="icon-btn" id="reportsToggleBtn" title="Inteligência &amp; Relatórios" aria-label="Abrir inteligência e relatórios">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>
+    </button>
+    <button type="button" class="icon-btn" id="panelToggleBtn" title="Configurações" aria-label="Abrir configurações"></button>
+  </header>
+
+  <!-- ===================== PAINEL ===================== -->
+  <section id="panel-painel" class="panel is-active">
+
+    <div class="grid-top">
+      <div class="hero-col">
+        <div id="waitingCard" class="waiting-card">
+          <p class="waiting-card__label">Clientes aguardando</p>
+          <p id="waitingValue" class="waiting-card__value">–</p>
+        </div>
+
+        <div id="moodCard" class="mood-card" data-level="offline">
+          <span class="mood-card__icon" id="moodIcon"></span>
+          <p class="mood-card__title" id="moodTitle">Carregando…</p>
+          <p class="mood-card__message" id="moodMessage">Buscando dados do wallboard.</p>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat" id="statActive">
+          <div class="stat__head">
+            <span class="stat__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-1a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <div class="stat__label-wrap"><p class="stat__label">Em atendimento</p><p class="stat__sublabel">Capacidade no momento</p></div>
+          </div>
+          <p class="stat__value"><span id="activeCount">–</span><span class="stat__value-secondary">/ <span id="activeCapacity">–</span></span></p>
+        </div>
+
+        <div class="stat" id="statEnded">
+          <div class="stat__head">
+            <span class="stat__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </span>
+            <div class="stat__label-wrap"><p class="stat__label">Atendimentos concluídos</p><p class="stat__sublabel">Hoje x ontem</p></div>
+          </div>
+          <p class="stat__value"><span id="endedToday">–</span><span class="stat__value-secondary">/ <span id="endedYesterday">–</span></span></p>
+        </div>
+
+        <div class="stat" id="statLosses">
+          <div class="stat__head">
+            <span class="stat__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+            </span>
+            <div class="stat__label-wrap"><p class="stat__label">Perdas</p><p class="stat__sublabel">No período</p></div>
+          </div>
+          <p class="stat__value"><span id="lossesCount">–</span><span class="stat__value-secondary">(<span id="lossesPct">–</span>%)</span></p>
+        </div>
+
+        <div class="stat" id="statTme">
+          <div class="stat__head">
+            <span class="stat__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <div class="stat__label-wrap"><p class="stat__label">TME</p><p class="stat__sublabel">Tempo médio de espera</p></div>
+          </div>
+          <p class="stat__value" id="tmeValue">–</p>
+        </div>
+
+        <div class="stat" id="statTma">
+          <div class="stat__head">
+            <span class="stat__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 12l4-2"/><path d="M4 20l3.5-3.5"/></svg>
+            </span>
+            <div class="stat__label-wrap"><p class="stat__label">TMA</p><p class="stat__sublabel">Tempo médio de atendimento</p></div>
+          </div>
+          <p class="stat__value" id="tmaValue">–</p>
+        </div>
+
+        <div class="stat" id="statServiceLevel">
+          <div class="stat__head">
+            <span class="stat__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            </span>
+            <div class="stat__label-wrap"><p class="stat__label">Nível de serviço</p><p class="stat__sublabel">Meta de SLA</p></div>
+          </div>
+          <p class="stat__value"><span id="serviceLevel">–</span><span class="stat__value-secondary">%</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="target-bar">
+      <div class="target-bar__label-block">
+        <p class="target-bar__label">Volume do dia</p>
+        <p class="target-bar__hint">Referência, não é meta a bater</p>
+      </div>
+      <div class="target-bar__track-wrap">
+        <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+        <p id="targetStatus" class="target-bar__status">–</p>
+      </div>
+      <p class="target-bar__count"><span id="endedTodayBig">–</span><span class="dim"> / <span id="dailyTargetBig">–</span></span></p>
+    </div>
+
+    <section id="topicsCard" class="topics-card" style="display:none">
+      <div class="topics-card__head">
+        <div>
+          <h2>Assuntos semelhantes na fila</h2>
+          <p class="topics-card__hint" id="topicsHint">Agrupamento automático por palavras-chave do motivo de contato.</p>
+        </div>
+      </div>
+      <div id="topicsGrid" class="topics-grid"></div>
+    </section>
+
+    <p id="errorBanner" class="error-banner" style="display:none"></p>
+
+    <section class="agent-section" id="agentSection">
+      <div class="agent-section__head">
+        <h2>Analistas acima do tempo limite</h2>
+        <p class="agent-section__hint">Fonte: Painel RC — vertical Food</p>
+      </div>
+      <div class="table-wrap">
+        <table class="agent-table">
+          <thead><tr><th>Analista</th><th>Cliente</th><th>Fila</th><th>Tempo</th></tr></thead>
+          <tbody id="agentTableBody">
+            <tr><td colspan="4"><div class="empty-state"><span>Carregando…</span></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p id="agentError" class="error-banner" style="display:none"></p>
+    </section>
+
+  </section>
+
+  <!-- ===================== CONFIG ===================== -->
+  <section id="panel-config" class="panel">
+    <div class="config-head">
+      <h2>Configurações</h2>
+      <button type="button" class="link-btn" id="backToPanelBtn">← Voltar ao painel</button>
+    </div>
+    <form id="settingsForm">
+
+      <div class="card">
+        <div class="card__title">
+          <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v4H3z"/><path d="M3 10h18v4H3z"/><path d="M3 17h18v4H3z"/></svg></span>
+          <h2>Vertical e filas monitoradas</h2>
+        </div>
+        <div class="field">
+          <label>Vertical</label>
+          <div class="pill-static">Food</div>
+          <p class="field__hint">Fixo por enquanto.</p>
+        </div>
+        <div class="field">
+          <div class="field__row">
+            <label>Filas monitoradas dentro de Food</label>
+            <div>
+              <button type="button" id="selectAllQueues" class="link-btn">Selecionar todas</button>
+              <span class="dot-sep">·</span>
+              <button type="button" id="selectNoneQueues" class="link-btn">Limpar seleção</button>
+            </div>
+          </div>
+          <p class="field__hint">Vazio = monitora todas as filas de Food. Vale para a fila de espera e para o filtro de analistas.</p>
+          <div id="queueList" class="queue-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__title">
+          <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></span>
+          <h2>Metas de indicadores</h2>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label>Nível de serviço — bom a partir de (%)</label>
+            <p class="field__hint">Igual ou acima fica verde. Abaixo fica vermelho.</p>
+            <input type="number" id="serviceLevelGoodThreshold" min="1" max="100" step="1" required />
+          </div>
+          <div class="field">
+            <label>Perdas — vira atenção a partir de (qtde)</label>
+            <p class="field__hint">Zero fica verde. A partir deste valor fica amarelo.</p>
+            <input type="number" id="lossesWarnThreshold" min="1" step="1" required />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__title">
+          <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+          <h2>Alertas de fila de espera</h2>
+        </div>
+        <div class="field-grid">
+          <div class="field"><label>1º alerta após (segundos)</label><input type="number" id="queueFirstAlertSeconds" min="0" step="1" required /></div>
+          <div class="field"><label>Repetir a cada (minutos)</label><input type="number" id="queueReminderMinutes" min="1" step="1" required /></div>
+          <div class="field"><label>Limite para ficar crítico</label><input type="number" id="redThreshold" min="1" step="1" required /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__title">
+          <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></span>
+          <h2>Indicador de volume do dia</h2>
+        </div>
+        <p class="card__note">Não é uma meta a bater — quanto menos contato, melhor. É só um patamar de referência para perceber se o dia está mais corrido que o esperado.</p>
+        <div class="field-grid">
+          <div class="field"><label>Patamar de referência (atendimentos/dia)</label><input type="number" id="dailyTarget" min="1" step="1" required /></div>
+          <div class="field"><label>Repetir aviso a cada (minutos)</label><input type="number" id="dailyTargetReminderMinutes" min="1" step="1" required /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__title">
+          <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <h2>Alerta de tempo de atendimento por analista</h2>
+        </div>
+        <p class="field__hint">Fonte: Painel RC, já filtrado para a vertical Food.</p>
+        <div class="field-grid">
+          <div class="field"><label>1º alerta após (minutos)</label><input type="number" id="agentTmaFirstAlertMinutes" min="1" step="1" required /></div>
+          <div class="field"><label>2º alerta após (minutos)</label><input type="number" id="agentTmaSecondAlertMinutes" min="1" step="1" required /></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__title">
+          <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <h2>Assuntos semelhantes na fila</h2>
+        </div>
+        <p class="card__note">Agrupa clientes em fila com o mesmo tipo de problema (ex.: falha de TEF/maquininha/pagamento, erro ao abrir o sistema, erro no sistema). Depende de o retorno do Wallboard trazer um campo de motivo/assunto por cliente — enquanto isso não é confirmado, o card fica com um aviso de dados indisponíveis em vez de números inventados.</p>
+        <div class="field field--switch">
+          <label>Exibir indicador no painel</label>
+          <label class="switch"><input type="checkbox" id="similarIssuesEnabled" /><span class="switch__track"><span class="switch__thumb"></span></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__title">
+          <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"/></svg></span>
+          <h2>Analistas acima do tempo limite</h2>
+        </div>
+        <p class="card__note">Tabela na tela principal com os analistas cujo tempo de atendimento passou dos limites definidos abaixo.</p>
+        <div class="field field--switch">
+          <label>Exibir tabela no painel</label>
+          <label class="switch"><input type="checkbox" id="agentTmaTableEnabled" /><span class="switch__track"><span class="switch__thumb"></span></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card__title">
+          <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></span>
+          <h2>Som</h2>
+        </div>
+        <div class="field field--switch">
+          <label>Efeitos sonoros</label>
+          <label class="switch"><input type="checkbox" id="soundEnabled" /><span class="switch__track"><span class="switch__thumb"></span></span></label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn btn--primary">Salvar configurações</button>
+        <button type="button" id="resetBtn" class="btn btn--ghost">Restaurar padrão</button>
+      </div>
+      <p id="savedMsg" class="saved-msg" style="display:none">Configurações salvas neste navegador.</p>
+    </form>
+  </section>
+
+  <!-- ===================== INTELIGÊNCIA & RELATÓRIOS ===================== -->
+  <section id="panel-reports" class="panel">
+    <div class="config-head">
+      <h2>Inteligência &amp; Relatórios</h2>
+      <button type="button" class="link-btn" id="refreshReportsBtn">Atualizar</button>
+    </div>
+    <p class="reports-hint">
+      Construído a partir do histórico coletado automaticamente a cada 5 minutos (desde que essa aba foi
+      publicada). Quanto mais dias passarem, mais precisas ficam as comparações, o mapa de calor e a
+      previsão abaixo — no começo, é normal aparecer "sem dados suficientes" em vários pontos.
+    </p>
+
+    <div class="card">
+      <div class="card__title">
+        <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v4H3z"/><path d="M3 10h18v4H3z"/><path d="M3 17h18v4H3z"/></svg></span>
+        <h2>Filas incluídas nesta análise</h2>
+      </div>
+      <div class="field">
+        <div class="field__row">
+          <label id="reportsQueueSummary">Todas as filas</label>
+          <div>
+            <button type="button" id="reportsToggleQueueList" class="link-btn">Escolher filas</button>
+          </div>
+        </div>
+        <p class="field__hint">
+          Por padrão, os comparativos, o mapa de calor e a previsão abaixo somam <strong>todas as filas de
+          Food</strong>. Selecione filas específicas pra ver a análise só delas.
+        </p>
+        <div id="reportsQueuePicker" style="display:none; margin-top:10px;">
+          <div class="field__row">
+            <span></span>
+            <div>
+              <button type="button" id="reportsSelectAllQueues" class="link-btn">Selecionar todas</button>
+              <span class="dot-sep">·</span>
+              <button type="button" id="reportsSelectNoneQueues" class="link-btn">Limpar seleção</button>
+            </div>
+          </div>
+          <div id="reportsQueueList" class="queue-list"></div>
+          <div class="actions" style="margin-top:10px;">
+            <button type="button" id="reportsApplyQueues" class="btn btn--primary">Aplicar seleção</button>
+            <button type="button" id="reportsCancelQueues" class="btn btn--ghost">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__title">
+        <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span>
+        <h2>Comparativos</h2>
+      </div>
+      <div id="comparisonsGrid" class="comparisons-grid">
+        <p class="reports-loading">Carregando…</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__title">
+        <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <h2>Mapa de calor — volume médio por hora e dia da semana</h2>
+      </div>
+      <div id="heatmapWrap" class="heatmap-wrap">
+        <p class="reports-loading">Carregando…</p>
+      </div>
+      <p class="reports-footnote">Cor mais forte = mais atendimentos, na média histórica daquele horário/dia da semana.</p>
+    </div>
+
+    <div class="card">
+      <div class="card__title">
+        <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
+        <h2>Previsão de hoje, por hora</h2>
+      </div>
+      <p class="reports-hint">
+        Baseado na média histórica do mesmo dia da semana e horário, com ajuste simples de tendência
+        recente. <strong>Não é Machine Learning ainda</strong> — é a base estatística sobre a qual um
+        modelo mais avançado (Prophet/XGBoost) poderia ser construído depois de alguns meses de histórico.
+      </p>
+      <div class="table-wrap">
+        <table class="forecast-table">
+          <thead><tr><th>Horário</th><th>Previsto</th><th>Realizado</th><th>Diferença</th></tr></thead>
+          <tbody id="forecastTableBody"><tr><td colspan="4" class="reports-loading">Carregando…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card__title">
+        <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+        <h2>Período do histórico</h2>
+      </div>
+      <p id="historyRangeText" class="reports-hint">Carregando…</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ===================== Supabase (proxies, sem CORS) =====================
+const SUPABASE_FUNCTIONS_BASE = "https://aktblbrbzzfislqszbqy.supabase.co/functions/v1";
+const SUPABASE_REST_BASE = "https://aktblbrbzzfislqszbqy.supabase.co/rest/v1";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_2FQkCHQzmLbIjdu67FSjnw_SU3dV06m";
+
+const DEFAULT_QUEUE_SKILLS = [
+  "Food - ADMFIN -- Demais opçõe","Food - ADMFIN -- Desbloqueio","FOOD- TASTE_ONE-BERCARIO","FOOD-ADMFIN",
+  "FOOD-ALO_PARCEIRO-DEGUST","FOOD-ALO_PARCEIRO-MENEW","FOOD-ALO_PARCEIRO-NEEMO","FOOD-ALO_PARCEIRO-STONE",
+  "FOOD-ALO_PARCEIRO-TASTE_ONE","FOOD-DEGUST-BERCARIO","FOOD-DEGUST-BOBS","FOOD-DEGUST-MILKMOO",
+  "FOOD-DEGUST-N1_SUPORTE","FOOD-DEGUST-N2_SUPORTE","FOOD-MENEW-BERCARIO","FOOD-MENEW-N1_SUPORTE",
+  "FOOD-MENEW-N2_SUPORTE","FOOD-NEEMO-BERCARIO","FOOD-NEEMO-N1_SUPORTE","FOOD-NEEMO-N2_SUPORTE",
+  "FOOD-TASTE_ONE-N1_SUPORTE","FOOD-TASTE_ONE-N2_SUPORTE","FOOD-DEGUST-PDV Integrações",
+  "FOOD-DEGUST-PDV Operacional (Geral)","FOOD-DEGUST-Periféricos",
+];
+
+const DEFAULT_SETTINGS = {
+  selectedQueues: null,
+  queueFirstAlertSeconds: 20,
+  queueReminderMinutes: 5,
+  redThreshold: 3,
+  dailyTarget: 350,
+  dailyTargetReminderMinutes: 60,
+  agentTmaFirstAlertMinutes: 60,
+  agentTmaSecondAlertMinutes: 120,
+  soundEnabled: true,
+  serviceLevelGoodThreshold: 85,
+  lossesWarnThreshold: 1,
+  similarIssuesEnabled: false,
+  agentTmaTableEnabled: true,
+};
+
+const LS_KEY = "orionWebSettings";
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : { ...DEFAULT_SETTINGS };
+  } catch { return { ...DEFAULT_SETTINGS }; }
+}
+function saveSettingsToStorage(s) { try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch {} }
+
+function classifyQueue(waiting, settings) {
+  if (!waiting || waiting <= 0) return "ok";
+  if (waiting <= settings.redThreshold) return "warning";
+  return "critical";
+}
+function classifyAgentTma(seconds, settings) {
+  if (seconds == null) return "ok";
+  const t1 = settings.agentTmaFirstAlertMinutes * 60;
+  const t2 = settings.agentTmaSecondAlertMinutes * 60;
+  if (seconds >= t2) return "critical";
+  if (seconds >= t1) return "warning";
+  return "ok";
+}
+function classifyServiceLevel(value, settings) {
+  if (value == null || Number.isNaN(value)) return null;
+  return value >= settings.serviceLevelGoodThreshold ? "good" : "bad";
+}
+function classifyLosses(count, settings) {
+  if (count == null || Number.isNaN(count)) return null;
+  return count < settings.lossesWarnThreshold ? "good" : "warn";
+}
+function getActiveSkills(settings) {
+  return Array.isArray(settings.selectedQueues) && settings.selectedQueues.length > 0
+    ? settings.selectedQueues : DEFAULT_QUEUE_SKILLS;
+}
+function setStatLevel(el, level) {
+  if (!el) return;
+  el.classList.remove("is-good", "is-warn", "is-bad");
+  if (level) el.classList.add(`is-${level}`);
+}
+
+// ===================== Mood card (icon/title/message por nível) =====================
+const ICONS = {
+  rocket: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  wifiOff: '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="100%" height="100%"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>',
+};
+
+const MOOD_STATES = {
+  ok: { icon: "rocket", title: "Fila zerada!", message: "Atendimento no ritmo perfeito." },
+  warning: { icon: "alert", title: "Atenção", message: "Clientes começando a entrar na fila." },
+  critical: { icon: "alert", title: "Fila crítica", message: "Acima do limite configurado — reforço necessário." },
+  offline: { icon: "wifiOff", title: "Sem conexão", message: "Não foi possível ler os dados ao vivo." },
+};
+
+function applyMood(level) {
+  const state = MOOD_STATES[level] || MOOD_STATES.offline;
+  const card = document.getElementById("moodCard");
+  card.dataset.level = level;
+  document.getElementById("moodIcon").innerHTML = ICONS[state.icon];
+  document.getElementById("moodTitle").textContent = state.title;
+  document.getElementById("moodMessage").textContent = state.message;
+}
+
+// ===================== Painel <-> Configurações =====================
+const GEAR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+const BACK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>';
+
+const panelToggleBtn = document.getElementById("panelToggleBtn");
+const reportsToggleBtn = document.getElementById("reportsToggleBtn");
+panelToggleBtn.innerHTML = GEAR_ICON;
+
+function setPanel(name) {
+  document.getElementById("panel-painel").classList.toggle("is-active", name === "painel");
+  document.getElementById("panel-config").classList.toggle("is-active", name === "config");
+  document.getElementById("panel-reports").classList.toggle("is-active", name === "reports");
+
+  panelToggleBtn.innerHTML = name === "config" ? BACK_ICON : GEAR_ICON;
+  panelToggleBtn.title = name === "config" ? "Voltar ao painel" : "Configurações";
+  panelToggleBtn.setAttribute("aria-label", panelToggleBtn.title);
+
+  reportsToggleBtn.classList.toggle("is-active-tab", name === "reports");
+  reportsToggleBtn.title = name === "reports" ? "Voltar ao painel" : "Inteligência & Relatórios";
+
+  panelToggleBtn.dataset.current = name;
+
+  if (name === "reports") loadReports();
+}
+panelToggleBtn.addEventListener("click", () => {
+  setPanel(panelToggleBtn.dataset.current === "config" ? "painel" : "config");
+});
+reportsToggleBtn.addEventListener("click", () => {
+  setPanel(panelToggleBtn.dataset.current === "reports" ? "painel" : "reports");
+});
+document.getElementById("backToPanelBtn").addEventListener("click", () => setPanel("painel"));
+setPanel("painel");
+
+// ===================== Config form =====================
+const form = document.getElementById("settingsForm");
+const f = {
+  queueFirstAlertSeconds: document.getElementById("queueFirstAlertSeconds"),
+  queueReminderMinutes: document.getElementById("queueReminderMinutes"),
+  redThreshold: document.getElementById("redThreshold"),
+  dailyTarget: document.getElementById("dailyTarget"),
+  dailyTargetReminderMinutes: document.getElementById("dailyTargetReminderMinutes"),
+  agentTmaFirstAlertMinutes: document.getElementById("agentTmaFirstAlertMinutes"),
+  agentTmaSecondAlertMinutes: document.getElementById("agentTmaSecondAlertMinutes"),
+  soundEnabled: document.getElementById("soundEnabled"),
+  serviceLevelGoodThreshold: document.getElementById("serviceLevelGoodThreshold"),
+  lossesWarnThreshold: document.getElementById("lossesWarnThreshold"),
+  similarIssuesEnabled: document.getElementById("similarIssuesEnabled"),
+  agentTmaTableEnabled: document.getElementById("agentTmaTableEnabled"),
+};
+const queueListEl = document.getElementById("queueList");
+const savedMsg = document.getElementById("savedMsg");
+const chipQueues = document.getElementById("chipQueues");
+
+function buildQueueChecklist(selected) {
+  queueListEl.innerHTML = "";
+  const set = new Set(selected || []);
+  DEFAULT_QUEUE_SKILLS.forEach((skill, i) => {
+    const row = document.createElement("div");
+    row.className = "queue-item";
+    row.innerHTML = `<input type="checkbox" id="q_${i}" value="${skill}" ${set.has(skill) ? "checked" : ""}/><label for="q_${i}"></label>`;
+    row.querySelector("label").textContent = skill;
+    queueListEl.appendChild(row);
+  });
+}
+function getSelectedFromForm() {
+  const checked = Array.from(queueListEl.querySelectorAll("input:checked")).map((c) => c.value);
+  return checked.length > 0 ? checked : null;
+}
+function updateQueueChip(settings) {
+  const n = Array.isArray(settings.selectedQueues) ? settings.selectedQueues.length : 0;
+  chipQueues.textContent = n > 0 ? `${n} fila${n > 1 ? "s" : ""} selecionada${n > 1 ? "s" : ""}` : "Todas as filas";
+}
+
+function applyAgentSectionVisibility(settings) {
+  const section = document.getElementById("agentSection");
+  if (section) section.style.display = settings.agentTmaTableEnabled ? "" : "none";
+}
+
+let currentSettings = loadSettings();
+
+function fillForm(s) {
+  f.queueFirstAlertSeconds.value = s.queueFirstAlertSeconds;
+  f.queueReminderMinutes.value = s.queueReminderMinutes;
+  f.redThreshold.value = s.redThreshold;
+  f.dailyTarget.value = s.dailyTarget;
+  f.dailyTargetReminderMinutes.value = s.dailyTargetReminderMinutes;
+  f.agentTmaFirstAlertMinutes.value = s.agentTmaFirstAlertMinutes;
+  f.agentTmaSecondAlertMinutes.value = s.agentTmaSecondAlertMinutes;
+  f.soundEnabled.checked = s.soundEnabled;
+  f.serviceLevelGoodThreshold.value = s.serviceLevelGoodThreshold;
+  f.lossesWarnThreshold.value = s.lossesWarnThreshold;
+  f.similarIssuesEnabled.checked = s.similarIssuesEnabled;
+  f.agentTmaTableEnabled.checked = s.agentTmaTableEnabled;
+  buildQueueChecklist(s.selectedQueues);
+  updateQueueChip(s);
+}
+fillForm(currentSettings);
+applyAgentSectionVisibility(currentSettings);
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  currentSettings = {
+    selectedQueues: getSelectedFromForm(),
+    queueFirstAlertSeconds: Math.max(0, parseInt(f.queueFirstAlertSeconds.value, 10) || 0),
+    queueReminderMinutes: Math.max(1, parseInt(f.queueReminderMinutes.value, 10) || DEFAULT_SETTINGS.queueReminderMinutes),
+    redThreshold: Math.max(1, parseInt(f.redThreshold.value, 10) || DEFAULT_SETTINGS.redThreshold),
+    dailyTarget: Math.max(1, parseInt(f.dailyTarget.value, 10) || DEFAULT_SETTINGS.dailyTarget),
+    dailyTargetReminderMinutes: Math.max(1, parseInt(f.dailyTargetReminderMinutes.value, 10) || DEFAULT_SETTINGS.dailyTargetReminderMinutes),
+    agentTmaFirstAlertMinutes: Math.max(1, parseInt(f.agentTmaFirstAlertMinutes.value, 10) || DEFAULT_SETTINGS.agentTmaFirstAlertMinutes),
+    agentTmaSecondAlertMinutes: Math.max(1, parseInt(f.agentTmaSecondAlertMinutes.value, 10) || DEFAULT_SETTINGS.agentTmaSecondAlertMinutes),
+    soundEnabled: f.soundEnabled.checked,
+    serviceLevelGoodThreshold: Math.min(100, Math.max(1, parseInt(f.serviceLevelGoodThreshold.value, 10) || DEFAULT_SETTINGS.serviceLevelGoodThreshold)),
+    lossesWarnThreshold: Math.max(1, parseInt(f.lossesWarnThreshold.value, 10) || DEFAULT_SETTINGS.lossesWarnThreshold),
+    similarIssuesEnabled: f.similarIssuesEnabled.checked,
+    agentTmaTableEnabled: f.agentTmaTableEnabled.checked,
+  };
+  saveSettingsToStorage(currentSettings);
+  updateQueueChip(currentSettings);
+  applyAgentSectionVisibility(currentSettings);
+  savedMsg.style.display = "block";
+  setTimeout(() => (savedMsg.style.display = "none"), 2500);
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  currentSettings = { ...DEFAULT_SETTINGS };
+  saveSettingsToStorage(currentSettings);
+  fillForm(currentSettings);
+  applyAgentSectionVisibility(currentSettings);
+});
+document.getElementById("selectAllQueues").addEventListener("click", () => {
+  queueListEl.querySelectorAll("input").forEach((c) => (c.checked = true));
+});
+document.getElementById("selectNoneQueues").addEventListener("click", () => {
+  queueListEl.querySelectorAll("input").forEach((c) => (c.checked = false));
+});
+
+// ===================== Chamadas aos proxies Supabase =====================
+async function callSupabaseFunction(name, options = {}) {
+  const res = await fetch(`${SUPABASE_FUNCTIONS_BASE}/${name}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      ...(options.headers || {}),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+function formatSeconds(s) {
+  if (s == null || Number.isNaN(s)) return "–";
+  const v = Math.round(s);
+  return `${String(Math.floor(v / 60)).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`;
+}
+
+// ===================== Assuntos semelhantes na fila =====================
+// Categorização por palavras-chave. Ajuste/expanda os termos conforme o
+// vocabulário real assim que confirmarmos o campo de assunto/motivo na API.
+const TOPIC_CATEGORIES = [
+  { key: "tef", label: "TEF / Maquininha / Pagamento", keywords: ["tef", "maquininha", "maquinet", "pagamento", "cartao", "cartão", "pinpad", "pix"] },
+  { key: "login", label: "Erro ao abrir o sistema", keywords: ["abrir o sistema", "não abre", "nao abre", "login", "acesso", "logar", "senha", "trava ao abrir"] },
+  { key: "erro_sistema", label: "Erro no sistema", keywords: ["erro no sistema", "erro sistema", "bug", "trava", "travando", "lentidão", "lentidao", "falha no sistema"] },
+  { key: "outros", label: "Outros assuntos", keywords: [] },
+];
+
+function categorizeSubject(text) {
+  const t = (text || "").toLowerCase();
+  if (!t) return null;
+  for (const cat of TOPIC_CATEGORIES) {
+    if (cat.key === "outros") continue;
+    if (cat.keywords.some((kw) => t.includes(kw))) return cat.key;
+  }
+  return "outros";
+}
+
+// Tenta localizar, no retorno do proxy, uma lista de clientes em fila com
+// algum campo de assunto/motivo. Vários nomes possíveis são testados porque
+// ainda não validamos o formato exato do endpoint PainelRC para isso.
+function extractWaitingSubjects(board) {
+  const listCandidates = [board.waitingList, board.waitingItems, board.filaClientes, board.queueClients, board.waitingClients];
+  const list = listCandidates.find((v) => Array.isArray(v) && v.length > 0);
+  if (!list) return null;
+  return list
+    .map((item) => item.assunto || item.motivo || item.subject || item.tabulacao || item.reason || item.descricao || null)
+    .filter(Boolean);
+}
+
+function renderTopicsCard(board, settings) {
+  const card = document.getElementById("topicsCard");
+  const grid = document.getElementById("topicsGrid");
+  const hint = document.getElementById("topicsHint");
+
+  if (!settings.similarIssuesEnabled) {
+    card.style.display = "none";
+    return;
+  }
+  card.style.display = "block";
+
+  const subjects = board ? extractWaitingSubjects(board) : null;
+
+  if (!subjects) {
+    hint.textContent = "Dados de assunto/motivo por cliente ainda não disponíveis no retorno do Wallboard — indicador pronto para ativar assim que a fonte trouxer esse campo.";
+    grid.innerHTML = '<div class="topics-empty">Nenhum dado de assunto recebido da API no momento. Assim que o campo de motivo/assunto por cliente em fila for confirmado no endpoint do Painel RC, este card passa a mostrar automaticamente quantos clientes compartilham o mesmo problema (ex.: "4 de 7 clientes em fila relatam falha na TEF").</div>';
+    return;
+  }
+
+  hint.textContent = `Agrupamento automático de ${subjects.length} cliente(s) em fila por palavra-chave do motivo de contato.`;
+  const counts = {};
+  TOPIC_CATEGORIES.forEach((c) => (counts[c.key] = 0));
+  subjects.forEach((s) => {
+    const key = categorizeSubject(s) || "outros";
+    counts[key] = (counts[key] || 0) + 1;
+  });
+
+  grid.innerHTML = "";
+  TOPIC_CATEGORIES.forEach((cat) => {
+    const n = counts[cat.key] || 0;
+    if (n === 0) return;
+    const pill = document.createElement("div");
+    pill.className = "topic-pill" + (cat.key !== "outros" && n >= 3 ? " topic-pill--critical" : "");
+    pill.innerHTML = `<span class="topic-pill__count">${n}<small> / ${subjects.length}</small></span><span class="topic-pill__label">${cat.label}</span>`;
+    grid.appendChild(pill);
+  });
+}
+
+function tempoCellClass(level) {
+  if (level === "critical") return "tempo-critical";
+  if (level === "warning") return "tempo-warning";
+  return "";
+}
+
+async function refreshPanel() {
+  const settings = loadSettings();
+  const skills = getActiveSkills(settings);
+  const errorBanner = document.getElementById("errorBanner");
+  const connStatus = document.getElementById("connStatus");
+  const connStatusPill = document.getElementById("connStatusPill");
+
+  try {
+    const board = await callSupabaseFunction("wallboard-proxy", {
+      method: "POST",
+      body: JSON.stringify({ queueskills: skills }),
+    });
+
+    connStatus.textContent = "conectado";
+    connStatusPill.dataset.online = "true";
+    errorBanner.style.display = "none";
+
+    const waitingCount = board.waitingCount ?? 0;
+    const level = classifyQueue(waitingCount, settings);
+    document.getElementById("waitingValue").textContent = waitingCount;
+    applyMood(level);
+
+    document.getElementById("activeCount").textContent = board.activeCount ?? "–";
+    document.getElementById("activeCapacity").textContent = board.activeCapacity ?? "–";
+    document.getElementById("endedToday").textContent = board.endedToday ?? "–";
+    document.getElementById("endedYesterday").textContent = board.endedYesterday ?? "–";
+    document.getElementById("serviceLevel").textContent = board.serviceLevel ?? "–";
+    document.getElementById("lossesCount").textContent = board.lossesCount ?? "–";
+    document.getElementById("lossesPct").textContent = board.lossesPercentage ?? "–";
+    document.getElementById("tmeValue").textContent = formatSeconds(board.tme);
+    document.getElementById("tmaValue").textContent = formatSeconds(board.tma);
+
+    setStatLevel(document.getElementById("statServiceLevel"), classifyServiceLevel(board.serviceLevel, settings));
+    setStatLevel(document.getElementById("statLosses"), classifyLosses(board.lossesCount, settings));
+
+    const ended = board.endedToday ?? 0;
+    const target = settings.dailyTarget;
+    document.getElementById("endedTodayBig").textContent = ended;
+    document.getElementById("dailyTargetBig").textContent = target;
+    const pct = target > 0 ? Math.min(100, Math.round((ended / target) * 100)) : 0;
+    const fill = document.getElementById("progressFill");
+    fill.style.width = `${pct}%`;
+    fill.classList.toggle("is-complete", ended >= target);
+    document.getElementById("targetStatus").textContent =
+      ended >= target
+        ? `Volume acima da referência (${pct}%). Vale avaliar o balanceamento da equipe.`
+        : `${pct}% da referência do dia.`;
+
+    document.getElementById("updatedAt").textContent = `Atualizado às ${new Date().toLocaleTimeString("pt-BR")}`;
+    renderTopicsCard(board, settings);
+  } catch (err) {
+    connStatus.textContent = "sem conexão";
+    connStatusPill.dataset.online = "false";
+    applyMood("offline");
+    setStatLevel(document.getElementById("statServiceLevel"), null);
+    setStatLevel(document.getElementById("statLosses"), null);
+    errorBanner.style.display = "flex";
+    errorBanner.textContent = `Falha ao buscar dados do Wallboard via proxy (${err.message}).`;
+    renderTopicsCard(null, settings);
+  }
+
+  const agentTableBody = document.getElementById("agentTableBody");
+  const agentError = document.getElementById("agentError");
+  applyAgentSectionVisibility(settings);
+  if (!settings.agentTmaTableEnabled) {
+    // Desativado nas configurações: nem consulta o proxy do Painel RC pra essa tabela.
+    return;
+  }
+  try {
+    const panel = await callSupabaseFunction("painel-proxy", { method: "GET" });
+    agentError.style.display = "none";
+
+    const selectedSet = Array.isArray(settings.selectedQueues) && settings.selectedQueues.length > 0
+      ? new Set(settings.selectedQueues.map((s) => s.toLowerCase())) : null;
+
+    const rows = (panel.andamento?.rows || [])
+      .filter((r) => !selectedSet || selectedSet.has((r.__filaBase || r.Fila || "").toLowerCase()))
+      .map((r) => ({ ...r, __level: classifyAgentTma(r.__tempoSegundos, settings) }))
+      .filter((r) => r.__level !== "ok")
+      .sort((a, b) => (b.__tempoSegundos || 0) - (a.__tempoSegundos || 0));
+
+    agentTableBody.innerHTML = "";
+    if (rows.length === 0) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 4;
+      td.innerHTML = `<div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <strong>Nenhum analista acima do tempo limite</strong>
+        <span>Atendimento dentro do esperado no momento.</span>
+      </div>`;
+      tr.appendChild(td);
+      agentTableBody.appendChild(tr);
+    } else {
+      rows.forEach((r) => {
+        const tr = document.createElement("tr");
+        const href = r.Cliente__href || r.Analista__href;
+        const analistaTd = document.createElement("td");
+        if (href) {
+          const a = document.createElement("a");
+          a.href = href; a.target = "_blank"; a.textContent = r.Analista || "–";
+          analistaTd.appendChild(a);
+        } else {
+          analistaTd.textContent = r.Analista || "–";
+        }
+        const clienteTd = document.createElement("td"); clienteTd.textContent = r.Cliente || "–";
+        const filaTd = document.createElement("td"); filaTd.textContent = r.Fila || "–";
+        const tempoTd = document.createElement("td"); tempoTd.textContent = r.Tempo || "–"; tempoTd.className = tempoCellClass(r.__level);
+        tr.append(analistaTd, clienteTd, filaTd, tempoTd);
+        agentTableBody.appendChild(tr);
+      });
+    }
+  } catch (err) {
+    agentError.style.display = "flex";
+    agentError.textContent = `Falha ao buscar dados do Painel RC via proxy (${err.message}).`;
+    agentTableBody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><span>Sem dados.</span></div></td></tr>';
+  }
+}
+
+refreshPanel();
+setInterval(refreshPanel, 20000);
+
+// ======================================================================
+// Inteligência & Relatórios — histórico, comparativos, heatmap, previsão
+// ======================================================================
+
+const QUEUE_NAME_ALL = "TODAS (Food)";
+const WEEKDAY_LABELS = ["", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"]; // índice 1..7 (ISO)
+const REPORT_HOURS = Array.from({ length: 24 }, (_, i) => i); // 0..23
+
+// Busca com timeout: sem isso, uma requisição que nunca resolve (rede/CORS
+// travando) deixa a aba de Inteligência presa em "Carregando..." pra sempre,
+// sem cair no catch e sem nunca mostrar erro nenhum pro usuário.
+async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error(`Tempo esgotado (${timeoutMs / 1000}s) ao consultar ${new URL(url).pathname}`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Monta o valor de um filtro PostgREST "in.(...)" com aspas/escape corretos
+// pra nomes de fila que têm espaço, hífen, parênteses etc.
+function postgrestInList(values) {
+  const quoted = values.map((v) => `"${String(v).replace(/"/g, '""')}"`);
+  return `in.(${quoted.join(",")})`;
+}
+
+async function fetchHourlyMetricsRaw({ fromDate, toDate, queueName, queueNames } = {}) {
+  const params = new URLSearchParams();
+  params.set("select", "metric_date,hour,weekday,week_of_month,iso_week,month,year,ended_count_hour,ended_count_accum_day,tme_seconds,tma_seconds,service_level,losses_percentage,waiting_count,queue_name");
+  if (queueName) {
+    params.set("queue_name", `eq.${queueName}`);
+  } else if (queueNames && queueNames.length > 0) {
+    params.set("queue_name", postgrestInList(queueNames));
+  }
+  params.set("order", "metric_date.asc,hour.asc");
+  if (fromDate) params.append("metric_date", `gte.${fromDate}`);
+  if (toDate) params.append("metric_date", `lte.${toDate}`);
+
+  const res = await fetchWithTimeout(`${SUPABASE_REST_BASE}/hourly_metrics?${params.toString()}`, {
+    headers: {
+      "apikey": SUPABASE_PUBLISHABLE_KEY,
+      "Authorization": `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+    },
+  });
+  if (!res.ok) {
+    const bodyText = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status} ao consultar histórico${bodyText ? ` — ${bodyText.slice(0, 200)}` : ""}`);
+  }
+  return res.json();
+}
+
+// Agrupa linhas por fila em uma única linha "TODAS" por (data, hora),
+// somando contagens e fazendo média ponderada dos tempos/percentuais.
+function aggregateAllQueues(rows) {
+  const buckets = {};
+  rows.forEach((r) => {
+    const key = `${r.metric_date}-${r.hour}`;
+    if (!buckets[key]) {
+      buckets[key] = {
+        metric_date: r.metric_date, hour: r.hour, weekday: r.weekday,
+        week_of_month: r.week_of_month, iso_week: r.iso_week, month: r.month, year: r.year,
+        ended_count_hour: 0, ended_count_accum_day: 0, waiting_count: 0,
+        _tmeSum: 0, _tmaSum: 0, _slSum: 0, _lossSum: 0, _n: 0,
+      };
+    }
+    const b = buckets[key];
+    b.ended_count_hour += Number(r.ended_count_hour) || 0;
+    b.ended_count_accum_day += Number(r.ended_count_accum_day) || 0;
+    b.waiting_count += Number(r.waiting_count) || 0;
+    if (r.tme_seconds != null) { b._tmeSum += Number(r.tme_seconds); b._n += 1; }
+    if (r.tma_seconds != null) b._tmaSum += Number(r.tma_seconds);
+    if (r.service_level != null) b._slSum += Number(r.service_level);
+    if (r.losses_percentage != null) b._lossSum += Number(r.losses_percentage);
+  });
+  return Object.values(buckets).map((b) => ({
+    metric_date: b.metric_date, hour: b.hour, weekday: b.weekday,
+    week_of_month: b.week_of_month, iso_week: b.iso_week, month: b.month, year: b.year,
+    ended_count_hour: b.ended_count_hour, ended_count_accum_day: b.ended_count_accum_day,
+    waiting_count: b.waiting_count,
+    tme_seconds: b._n ? b._tmeSum / b._n : null,
+    tma_seconds: b._n ? b._tmaSum / b._n : null,
+    service_level: b._n ? b._slSum / b._n : null,
+    losses_percentage: b._n ? b._lossSum / b._n : null,
+  })).sort((a, b) => (a.metric_date + a.hour).localeCompare(b.metric_date + b.hour));
+}
+
+// selectedQueues: null/undefined = todas as filas de Food. Array = só essas filas.
+async function fetchHourlyMetrics({ fromDate, toDate, selectedQueues } = {}) {
+  const isSpecificSubset = Array.isArray(selectedQueues) && selectedQueues.length > 0;
+
+  if (isSpecificSubset) {
+    // Filas específicas: sempre busca por fila individual e agrega no
+    // cliente só as escolhidas (não existe linha pré-agregada pra um
+    // subconjunto arbitrário de filas).
+    const perQueue = await fetchHourlyMetricsRaw({ fromDate, toDate, queueNames: selectedQueues });
+    return aggregateAllQueues(perQueue);
+  }
+
+  // Todas as filas: primeiro tenta a linha consolidada "TODAS (Food)", que é
+  // mais barata de consultar.
+  const consolidated = await fetchHourlyMetricsRaw({ fromDate, toDate, queueName: QUEUE_NAME_ALL });
+  if (consolidated.length > 0) return consolidated;
+
+  // Se não existir (job de coleta ainda não grava essa linha, ou grava só
+  // por fila individual), busca tudo e agrega no cliente — assim a aba nunca
+  // fica vazia/travada só por causa de uma linha agregada que não existe.
+  const perQueue = await fetchHourlyMetricsRaw({ fromDate, toDate });
+  return aggregateAllQueues(perQueue);
+}
+
+function todayLocalISODate() {
+  const now = new Date();
+  const tzOffsetMs = now.getTimezoneOffset() * 60000;
+  return new Date(now.getTime() - tzOffsetMs).toISOString().slice(0, 10);
+}
+
+function addDaysISO(isoDate, days) {
+  const d = new Date(`${isoDate}T00:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function sumBy(rows, key) {
+  return rows.reduce((acc, r) => acc + (Number(r[key]) || 0), 0);
+}
+function avgBy(rows, key) {
+  const vals = rows.map((r) => Number(r[key])).filter((v) => !Number.isNaN(v) && v != null);
+  if (vals.length === 0) return null;
+  return vals.reduce((a, b) => a + b, 0) / vals.length;
+}
+
+function renderComparisonCard(label, currentVal, previousVal, { unit = "", isTimeSeconds = false } = {}) {
+  const hasBoth = currentVal != null && previousVal != null;
+  const fmt = (v) => (isTimeSeconds ? formatSeconds(v) : `${Math.round(v)}${unit}`);
+
+  let deltaHtml = '<p class="comparison-card__empty">Sem dados suficientes para comparar.</p>';
+  if (hasBoth && previousVal !== 0) {
+    const diffPct = Math.round(((currentVal - previousVal) / previousVal) * 100);
+    const trend = diffPct > 0 ? "up" : diffPct < 0 ? "down" : "flat";
+    const arrow = diffPct > 0 ? "▲" : diffPct < 0 ? "▼" : "＝";
+    deltaHtml = `<p class="comparison-card__delta" data-trend="${trend}">${arrow} ${Math.abs(diffPct)}% vs. referência</p>`;
+  }
+
+  return `
+    <div class="comparison-card">
+      <p class="comparison-card__label">${label}</p>
+      <p class="comparison-card__value">${currentVal != null ? fmt(currentVal) : "–"}</p>
+      ${deltaHtml}
+    </div>`;
+}
+
+async function renderComparisons(selectedQueues) {
+  const grid = document.getElementById("comparisonsGrid");
+  const today = todayLocalISODate();
+  const yesterday = addDaysISO(today, -1);
+  const lastWeekSameDay = addDaysISO(today, -7);
+
+  const all = await fetchHourlyMetrics({ fromDate: addDaysISO(today, -120), toDate: today, selectedQueues });
+
+  const rowsToday = all.filter((r) => r.metric_date === today);
+  const rowsYesterday = all.filter((r) => r.metric_date === yesterday);
+  const rowsLastWeek = all.filter((r) => r.metric_date === lastWeekSameDay);
+
+  const todayWeekday = rowsToday[0]?.weekday ?? (new Date().getDay() || 7);
+  const historicalSameWeekday = all.filter((r) => r.weekday === todayWeekday && r.metric_date !== today);
+  const historicalAvgTotal = (() => {
+    const byDate = {};
+    historicalSameWeekday.forEach((r) => { byDate[r.metric_date] = (byDate[r.metric_date] || 0) + (r.ended_count_hour || 0); });
+    const totals = Object.values(byDate);
+    return totals.length ? totals.reduce((a, b) => a + b, 0) / totals.length : null;
+  })();
+
+  const totalToday = rowsToday.length ? Math.max(...rowsToday.map((r) => r.ended_count_accum_day || 0)) : null;
+  const totalYesterday = rowsYesterday.length ? Math.max(...rowsYesterday.map((r) => r.ended_count_accum_day || 0)) : null;
+  const totalLastWeek = rowsLastWeek.length ? Math.max(...rowsLastWeek.map((r) => r.ended_count_accum_day || 0)) : null;
+
+  grid.innerHTML = [
+    renderComparisonCard("Hoje x Ontem (volume)", totalToday, totalYesterday),
+    renderComparisonCard(`Hoje x ${WEEKDAY_LABELS[todayWeekday]} passada`, totalToday, totalLastWeek),
+    renderComparisonCard("Hoje x média histórica do dia", totalToday, historicalAvgTotal),
+    renderComparisonCard("TME hoje x ontem", avgBy(rowsToday, "tme_seconds"), avgBy(rowsYesterday, "tme_seconds"), { isTimeSeconds: true }),
+    renderComparisonCard("TMA hoje x ontem", avgBy(rowsToday, "tma_seconds"), avgBy(rowsYesterday, "tma_seconds"), { isTimeSeconds: true }),
+    renderComparisonCard("Nível de Serviço hoje x ontem", avgBy(rowsToday, "service_level"), avgBy(rowsYesterday, "service_level"), { unit: "%" }),
+  ].join("");
+
+  return all;
+}
+
+function colorForIntensity(value, max) {
+  if (value == null || max <= 0) return "var(--canvas-edge)";
+  const pct = Math.min(1, value / max);
+  // Interpola do tom claro (--canvas-edge) pro teal escuro (--teal-700), via alpha
+  const alpha = 0.12 + pct * 0.75;
+  return `rgba(15, 118, 144, ${alpha.toFixed(2)})`; // teal-700 aproximado em rgba
+}
+
+function renderHeatmap(all) {
+  const wrap = document.getElementById("heatmapWrap");
+
+  // Média de ended_count_hour por (weekday, hour), ignorando o dia de hoje em andamento
+  const today = todayLocalISODate();
+  const historical = all.filter((r) => r.metric_date !== today && r.ended_count_hour != null);
+
+  if (historical.length === 0) {
+    wrap.innerHTML = '<p class="reports-empty">Ainda não há dados suficientes pra montar o mapa de calor — volte em alguns dias.</p>';
+    return;
+  }
+
+  const buckets = {}; // "weekday-hour" -> {sum, count}
+  historical.forEach((r) => {
+    const key = `${r.weekday}-${r.hour}`;
+    if (!buckets[key]) buckets[key] = { sum: 0, count: 0 };
+    buckets[key].sum += r.ended_count_hour;
+    buckets[key].count += 1;
+  });
+
+  let maxAvg = 0;
+  const avgFor = (weekday, hour) => {
+    const b = buckets[`${weekday}-${hour}`];
+    if (!b) return null;
+    const avg = b.sum / b.count;
+    if (avg > maxAvg) maxAvg = avg;
+    return avg;
+  };
+
+  // Pré-computa antes de renderizar (pra ter maxAvg correto)
+  const grid = [];
+  for (const hour of REPORT_HOURS) {
+    for (let wd = 1; wd <= 7; wd++) grid.push([wd, hour, avgFor(wd, hour)]);
+  }
+
+  let html = '<div class="heatmap-grid">';
+  html += '<div class="heatmap-cell heatmap-head"></div>';
+  for (let wd = 1; wd <= 7; wd++) html += `<div class="heatmap-cell heatmap-head">${WEEKDAY_LABELS[wd]}</div>`;
+
+  for (const hour of REPORT_HOURS) {
+    html += `<div class="heatmap-cell heatmap-hour">${String(hour).padStart(2, "0")}h</div>`;
+    for (let wd = 1; wd <= 7; wd++) {
+      const val = grid.find((g) => g[0] === wd && g[1] === hour)[2];
+      if (val == null) {
+        html += '<div class="heatmap-cell heatmap-empty">–</div>';
+      } else {
+        html += `<div class="heatmap-cell" style="background:${colorForIntensity(val, maxAvg)}" title="${WEEKDAY_LABELS[wd]} ${hour}h — média ${val.toFixed(1)}">${Math.round(val)}</div>`;
+      }
+    }
+  }
+  html += "</div>";
+  wrap.innerHTML = html;
+}
+
+function renderForecast(all) {
+  const tbody = document.getElementById("forecastTableBody");
+  const today = todayLocalISODate();
+  const rowsToday = all.filter((r) => r.metric_date === today);
+  const todayWeekday = rowsToday[0]?.weekday ?? (new Date().getDay() || 7);
+  const currentHour = new Date().getHours();
+
+  const historical = all.filter((r) => r.metric_date !== today && r.weekday === todayWeekday && r.ended_count_hour != null);
+
+  if (historical.length < 3) {
+    tbody.innerHTML = '<tr><td colspan="4" class="reports-empty">Ainda não há histórico suficiente do mesmo dia da semana pra prever — volte em algumas semanas.</td></tr>';
+    return;
+  }
+
+  // Baseline: média histórica por hora (mesmo dia da semana), com leve ajuste
+  // de tendência comparando as últimas ocorrências com as mais antigas.
+  const byHour = {};
+  historical.forEach((r) => {
+    if (!byHour[r.hour]) byHour[r.hour] = [];
+    byHour[r.hour].push(r);
+  });
+
+  let rowsHtml = "";
+  REPORT_HOURS.forEach((hour) => {
+    const samples = (byHour[hour] || []).sort((a, b) => a.metric_date.localeCompare(b.metric_date));
+    if (samples.length === 0) return;
+
+    const avg = samples.reduce((a, s) => a + s.ended_count_hour, 0) / samples.length;
+    let trendAdj = 1;
+    if (samples.length >= 4) {
+      const half = Math.floor(samples.length / 2);
+      const older = samples.slice(0, half);
+      const recent = samples.slice(half);
+      const olderAvg = older.reduce((a, s) => a + s.ended_count_hour, 0) / older.length;
+      const recentAvg = recent.reduce((a, s) => a + s.ended_count_hour, 0) / recent.length;
+      if (olderAvg > 0) trendAdj = Math.max(0.5, Math.min(1.8, recentAvg / olderAvg));
+    }
+    const predicted = Math.round(avg * trendAdj);
+
+    const actualRow = rowsToday.find((r) => r.hour === hour);
+    const actual = actualRow ? actualRow.ended_count_hour : null;
+
+    let diffCell = "–";
+    let diffClass = "";
+    if (actual != null) {
+      const diff = actual - predicted;
+      diffClass = diff > 0 ? "diff-up" : diff < 0 ? "diff-down" : "";
+      diffCell = `${diff > 0 ? "+" : ""}${diff}`;
+    }
+
+    const isCurrent = hour === currentHour ? "is-current-hour" : "";
+    rowsHtml += `<tr class="${isCurrent}">
+      <td>${String(hour).padStart(2, "0")}h–${String(hour + 1).padStart(2, "0")}h</td>
+      <td>${predicted}</td>
+      <td>${actual != null ? actual : "–"}</td>
+      <td class="${diffClass}">${diffCell}</td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = rowsHtml || '<tr><td colspan="4" class="reports-empty">Sem horários com histórico suficiente ainda.</td></tr>';
+}
+
+function renderHistoryRange(all) {
+  const el = document.getElementById("historyRangeText");
+  if (all.length === 0) {
+    el.textContent = "Nenhum dado coletado ainda. A coleta automática roda a cada 5 minutos — volte em breve.";
+    return;
+  }
+  const dates = [...new Set(all.map((r) => r.metric_date))].sort();
+  const days = dates.length;
+  el.innerHTML = `Histórico de <strong>${days} dia${days > 1 ? "s" : ""}</strong>, de <strong>${dates[0]}</strong> até <strong>${dates[dates.length - 1]}</strong>. Quanto mais dias, mais precisos ficam os comparativos, o mapa de calor e a previsão.`;
+}
+
+let reportsLoaded = false;
+async function loadReports() {
+  const grid = document.getElementById("comparisonsGrid");
+  const heatmapWrap = document.getElementById("heatmapWrap");
+  const forecastBody = document.getElementById("forecastTableBody");
+  try {
+    grid.innerHTML = '<p class="reports-loading">Carregando…</p>';
+    heatmapWrap.innerHTML = '<p class="reports-loading">Carregando…</p>';
+    forecastBody.innerHTML = '<tr><td colspan="4" class="reports-loading">Carregando…</td></tr>';
+
+    const all = await renderComparisons(loadReportsSelectedQueues());
+    renderHeatmap(all);
+    renderForecast(all);
+    renderHistoryRange(all);
+    reportsLoaded = true;
+  } catch (err) {
+    console.error("[Polaris] Falha ao carregar Inteligência & Relatórios:", err);
+    const msg = `Não foi possível carregar os relatórios (${err.message}).`;
+    grid.innerHTML = `<p class="reports-empty">${msg}</p>`;
+    heatmapWrap.innerHTML = `<p class="reports-empty">${msg}</p>`;
+    forecastBody.innerHTML = `<tr><td colspan="4" class="reports-empty">${msg}</td></tr>`;
+  }
+}
+
+document.getElementById("refreshReportsBtn").addEventListener("click", loadReports);
+
+// ===================== Seletor de filas da aba de Inteligência =====================
+// Independente do seletor da tela de Configurações: aqui dá pra restringir a
+// análise (comparativos, mapa de calor, previsão) a filas específicas, ou
+// deixar em branco pra somar todas as filas de Food.
+const REPORTS_QUEUES_LS_KEY = "orionReportsSelectedQueues";
+
+function loadReportsSelectedQueues() {
+  try {
+    const raw = localStorage.getItem(REPORTS_QUEUES_LS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) && parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveReportsSelectedQueues(list) {
+  try {
+    if (!list || list.length === 0) localStorage.removeItem(REPORTS_QUEUES_LS_KEY);
+    else localStorage.setItem(REPORTS_QUEUES_LS_KEY, JSON.stringify(list));
+  } catch { /* localStorage indisponível — segue sem persistir */ }
+}
+
+function updateReportsQueueSummary() {
+  const selected = loadReportsSelectedQueues();
+  const el = document.getElementById("reportsQueueSummary");
+  if (!selected) {
+    el.textContent = `Todas as filas (${DEFAULT_QUEUE_SKILLS.length})`;
+  } else {
+    el.textContent = `${selected.length} de ${DEFAULT_QUEUE_SKILLS.length} filas selecionadas`;
+  }
+}
+
+const reportsQueuePicker = document.getElementById("reportsQueuePicker");
+const reportsQueueListEl = document.getElementById("reportsQueueList");
+
+function buildReportsQueueChecklist() {
+  const selected = loadReportsSelectedQueues();
+  const selectedSet = selected ? new Set(selected) : null;
+  reportsQueueListEl.innerHTML = "";
+  DEFAULT_QUEUE_SKILLS.forEach((skill, i) => {
+    const row = document.createElement("div");
+    row.className = "queue-item";
+    const id = `reportsQueue-${i}`;
+    row.innerHTML = `<input type="checkbox" id="${id}" value="${skill.replace(/"/g, "&quot;")}" ${!selectedSet || selectedSet.has(skill) ? "checked" : ""}><label for="${id}">${skill}</label>`;
+    reportsQueueListEl.appendChild(row);
+  });
+}
+
+document.getElementById("reportsToggleQueueList").addEventListener("click", () => {
+  const isOpen = reportsQueuePicker.style.display !== "none";
+  if (isOpen) {
+    reportsQueuePicker.style.display = "none";
+  } else {
+    buildReportsQueueChecklist();
+    reportsQueuePicker.style.display = "block";
+  }
+});
+
+document.getElementById("reportsSelectAllQueues").addEventListener("click", () => {
+  reportsQueueListEl.querySelectorAll("input").forEach((c) => (c.checked = true));
+});
+document.getElementById("reportsSelectNoneQueues").addEventListener("click", () => {
+  reportsQueueListEl.querySelectorAll("input").forEach((c) => (c.checked = false));
+});
+document.getElementById("reportsCancelQueues").addEventListener("click", () => {
+  reportsQueuePicker.style.display = "none";
+});
+document.getElementById("reportsApplyQueues").addEventListener("click", () => {
+  const checked = Array.from(reportsQueueListEl.querySelectorAll("input:checked")).map((c) => c.value);
+  if (checked.length === 0) {
+    alert("Selecione ao menos uma fila (ou clique em \"Selecionar todas\").");
+    return;
+  }
+  // Todas marcadas equivale a "sem filtro" (fica mais barato: usa a linha consolidada).
+  const toSave = checked.length === DEFAULT_QUEUE_SKILLS.length ? null : checked;
+  saveReportsSelectedQueues(toSave);
+  updateReportsQueueSummary();
+  reportsQueuePicker.style.display = "none";
+  loadReports();
+});
+
+updateReportsQueueSummary();
+
+</script>
+</body>
+</html>
