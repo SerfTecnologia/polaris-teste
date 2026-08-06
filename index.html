@@ -333,6 +333,9 @@
   .heatmap-cell.heatmap-head { font-weight: 700; color: var(--ink); background: transparent; }
   .heatmap-cell.heatmap-hour { font-weight: 700; color: var(--ink); background: transparent; text-align: right; padding-right: 6px; }
   .heatmap-cell.heatmap-empty { background: transparent; color: var(--ink-faint); }
+  .heatmap-cell.heatmap-inprogress { background: transparent; color: var(--ink-faint); border: 1px dashed var(--ink-faint); }
+  .heatmap-cell.heatmap-today { box-shadow: inset 0 0 0 2px var(--teal-600); }
+  .heatmap-cell.heatmap-head.heatmap-today { color: var(--teal-600); }
 
   .forecast-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   .forecast-table th { text-align: left; padding: 7px 10px; font-size: 11px; text-transform: uppercase; color: var(--teal-700); border-bottom: 1px solid var(--line); }
@@ -1180,6 +1183,13 @@ async function refreshPanel() {
 
 refreshPanel();
 setInterval(refreshPanel, 20000);
+// Mantém a aba de Inteligência viva enquanto estiver aberta, sem precisar
+// reabrir a aba ou clicar em "Atualizar" — a cada 5 min ela busca de novo o
+// histórico (mesmo intervalo da coleta), o que também é o que faz a hora
+// recém-fechada aparecer no mapa de calor e na previsão sem intervenção.
+setInterval(() => {
+  if (panelToggleBtn.dataset.current === "reports") loadReports();
+}, 5 * 60 * 1000);
 
 // ======================================================================
 // Inteligência & Relatórios — histórico, comparativos, heatmap, previsão
@@ -1387,12 +1397,22 @@ function colorForIntensity(value, max) {
 function renderHeatmap(all) {
   const wrap = document.getElementById("heatmapWrap");
 
-  // Média de ended_count_hour por (weekday, hour), ignorando o dia de hoje em andamento
+  // Média de ended_count_hour por (weekday, hour). Inclui os dias anteriores
+  // por completo, e também o dia de hoje — mas só as horas que já fecharam
+  // (ex.: às 11h, a hora das 10h já entra na média; a das 11h só entra depois
+  // que virar meio-dia). Assim o mapa vai se preenchendo ao longo do próprio
+  // dia, e não só a partir da semana seguinte.
   const today = todayLocalISODate();
-  const historical = all.filter((r) => r.metric_date !== today && r.ended_count_hour != null);
+  const todayWeekday = new Date().getDay() || 7;
+  const currentHour = new Date().getHours();
+  const historical = all.filter((r) => {
+    if (r.ended_count_hour == null) return false;
+    if (r.metric_date === today) return r.hour < currentHour;
+    return true;
+  });
 
   if (historical.length === 0) {
-    wrap.innerHTML = '<p class="reports-empty">Ainda não há dados suficientes pra montar o mapa de calor — volte em alguns dias.</p>';
+    wrap.innerHTML = '<p class="reports-empty">Ainda não há dados suficientes pra montar o mapa de calor — volte em algumas horas.</p>';
     return;
   }
 
@@ -1421,16 +1441,23 @@ function renderHeatmap(all) {
 
   let html = '<div class="heatmap-grid">';
   html += '<div class="heatmap-cell heatmap-head"></div>';
-  for (let wd = 1; wd <= 7; wd++) html += `<div class="heatmap-cell heatmap-head">${WEEKDAY_LABELS[wd]}</div>`;
+  for (let wd = 1; wd <= 7; wd++) {
+    const todayCls = wd === todayWeekday ? "heatmap-today" : "";
+    html += `<div class="heatmap-cell heatmap-head ${todayCls}">${WEEKDAY_LABELS[wd]}</div>`;
+  }
 
   for (const hour of REPORT_HOURS) {
     html += `<div class="heatmap-cell heatmap-hour">${String(hour).padStart(2, "0")}h</div>`;
     for (let wd = 1; wd <= 7; wd++) {
       const val = grid.find((g) => g[0] === wd && g[1] === hour)[2];
-      if (val == null) {
-        html += '<div class="heatmap-cell heatmap-empty">–</div>';
+      const isTodayCol = wd === todayWeekday ? "heatmap-today" : "";
+      const isInProgress = wd === todayWeekday && hour === currentHour;
+      if (isInProgress) {
+        html += `<div class="heatmap-cell heatmap-inprogress" title="${WEEKDAY_LABELS[wd]} ${hour}h — em andamento, fecha ao virar a hora">…</div>`;
+      } else if (val == null) {
+        html += `<div class="heatmap-cell heatmap-empty ${isTodayCol}">–</div>`;
       } else {
-        html += `<div class="heatmap-cell" style="background:${colorForIntensity(val, maxAvg)}" title="${WEEKDAY_LABELS[wd]} ${hour}h — média ${val.toFixed(1)}">${Math.round(val)}</div>`;
+        html += `<div class="heatmap-cell ${isTodayCol}" style="background:${colorForIntensity(val, maxAvg)}" title="${WEEKDAY_LABELS[wd]} ${hour}h — média ${val.toFixed(1)}">${Math.round(val)}</div>`;
       }
     }
   }
