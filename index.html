@@ -1840,19 +1840,48 @@ updateReportsQueueSummary();
   const header = document.querySelector(".header");
   const scrollEl = document.getElementById("panel-reports");
   if (!header || !scrollEl) return;
-  let lastTop = 0;
-  const MIN_DELTA = 8; // ignora tremulação de rolagem muito pequena
+
+  let lastY = scrollEl.scrollTop;
+  let hidden = false;
+  let accum = 0; // deslocamento acumulado na direção atual
+  let accumDir = 0; // 1 = descendo, -1 = subindo
+  let ticking = false;
+  const TOGGLE_THRESHOLD = 70; // só decide esconder/mostrar após esse tanto de rolagem CONSISTENTE
+
+  function evaluate() {
+    ticking = false;
+    const y = scrollEl.scrollTop;
+    const delta = y - lastY;
+    lastY = y;
+    if (delta === 0) return;
+
+    const dir = delta > 0 ? 1 : -1;
+    // Rolagem rápida/inercial (trackpad) oscila delta positivo/negativo
+    // quadro a quadro — só acumula enquanto a direção se mantiver; ao trocar
+    // de direção, reseta o acumulador em vez de ficar somando ruído.
+    accum = dir === accumDir ? accum + Math.abs(delta) : Math.abs(delta);
+    accumDir = dir;
+
+    if (y <= 40) {
+      accum = 0;
+      if (hidden) { hidden = false; header.classList.remove("header--hidden"); }
+      return;
+    }
+    if (accumDir === 1 && accum > TOGGLE_THRESHOLD && !hidden) {
+      hidden = true; header.classList.add("header--hidden"); accum = 0;
+    } else if (accumDir === -1 && accum > TOGGLE_THRESHOLD && hidden) {
+      hidden = false; header.classList.remove("header--hidden"); accum = 0;
+    }
+  }
+
   scrollEl.addEventListener(
     "scroll",
     () => {
-      const top = scrollEl.scrollTop;
-      if (Math.abs(top - lastTop) < MIN_DELTA) return;
-      if (top > lastTop && top > 40) {
-        header.classList.add("header--hidden");
-      } else {
-        header.classList.remove("header--hidden");
-      }
-      lastTop = top;
+      // No máximo um cálculo por frame, mesmo que o navegador dispare
+      // dezenas de eventos de scroll durante uma rolagem rápida.
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(evaluate);
     },
     { passive: true }
   );
