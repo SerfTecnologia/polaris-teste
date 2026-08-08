@@ -332,6 +332,7 @@
   .comparison-card__delta[data-trend="good"] { color: var(--green-ok); }
   .comparison-card__delta[data-trend="bad"] { color: var(--red-crit); }
   .comparison-card__delta[data-trend="flat"] { color: var(--ink-soft); }
+  .comparison-card__delta[data-trend="neutral"] { color: var(--teal-700); }
   .comparison-card__empty { font-size: 12px; color: var(--ink-faint); font-style: italic; }
 
   .heatmap-wrap { overflow-x: auto; }
@@ -804,6 +805,58 @@
         <button type="button" id="exportPdfBtn" class="btn btn--ghost">Exportar PDF</button>
       </div>
       <p id="exportStatus" class="reports-hint" style="display:none;"></p>
+    </div>
+
+    <div class="card">
+      <div class="card__title">
+        <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 21l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>
+        <h2>Comparar dois períodos</h2>
+      </div>
+      <p class="card__note">Compara volume, mapa de calor e indicadores entre dois intervalos — útil pra comparar um mês com outro, ou uma semana de campanha com uma semana normal.</p>
+      <div class="field-grid">
+        <div class="field">
+          <label>Período A</label>
+          <select id="compareAPreset">
+            <option value="lastMonth">Mês passado</option>
+            <option value="thisMonth">Este mês</option>
+            <option value="lastWeek">Semana passada</option>
+            <option value="thisWeek">Esta semana</option>
+            <option value="custom">Personalizado…</option>
+          </select>
+          <div class="field-grid" id="compareACustomRange" style="display:none; margin-top:10px;">
+            <div class="field"><label>De</label><input type="date" id="compareAFrom" /></div>
+            <div class="field"><label>Até</label><input type="date" id="compareATo" /></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Período B</label>
+          <select id="compareBPreset">
+            <option value="thisMonth">Este mês</option>
+            <option value="lastMonth">Mês passado</option>
+            <option value="thisWeek">Esta semana</option>
+            <option value="lastWeek">Semana passada</option>
+            <option value="custom">Personalizado…</option>
+          </select>
+          <div class="field-grid" id="compareBCustomRange" style="display:none; margin-top:10px;">
+            <div class="field"><label>De</label><input type="date" id="compareBFrom" /></div>
+            <div class="field"><label>Até</label><input type="date" id="compareBTo" /></div>
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" id="compareRunBtn" class="btn btn--primary">Comparar</button>
+      </div>
+      <p id="compareStatus" class="reports-hint" style="display:none;"></p>
+
+      <div id="compareResults" style="display:none; margin-top:16px;">
+        <div id="compareSummaryGrid" class="comparisons-grid"></div>
+        <p class="reports-hint" style="margin-top:16px;">Variação por dia da semana e horário (Período B em relação ao Período A). Células sem dado em algum dos dois períodos ficam em branco.</p>
+        <div id="compareHeatmapWrap" class="heatmap-wrap" style="margin-top:8px;"></div>
+        <div class="actions" style="margin-top:14px;">
+          <button type="button" id="compareExportXlsxBtn" class="btn btn--primary">Exportar comparação (XLSX)</button>
+          <button type="button" id="compareExportPdfBtn" class="btn btn--ghost">Exportar comparação (PDF)</button>
+        </div>
+      </div>
     </div>
 
     <div class="app-footer">
@@ -2115,6 +2168,277 @@ function exportPdf(rows, meta) {
 
 document.getElementById("exportXlsxBtn").addEventListener("click", () => runExport("xlsx"));
 document.getElementById("exportPdfBtn").addEventListener("click", () => runExport("pdf"));
+
+// ===================== Comparação entre dois períodos =====================
+["A", "B"].forEach((letter) => {
+  document.getElementById(`compare${letter}Preset`).addEventListener("change", () => {
+    const isCustom = document.getElementById(`compare${letter}Preset`).value === "custom";
+    document.getElementById(`compare${letter}CustomRange`).style.display = isCustom ? "grid" : "none";
+  });
+});
+(function initCompareDefaults() {
+  // Sugestão inicial: A = mês passado, B = mês atual (o caso de uso mais comum)
+  const today = todayLocalISODate();
+  const d = new Date(`${today}T00:00:00`);
+  const lastOfPrev = new Date(d.getFullYear(), d.getMonth(), 0);
+  const firstOfPrev = new Date(d.getFullYear(), d.getMonth() - 1, 1);
+  const fmt = (dt) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+  document.getElementById("compareAFrom").value = fmt(firstOfPrev);
+  document.getElementById("compareATo").value = fmt(lastOfPrev);
+  document.getElementById("compareBFrom").value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
+  document.getElementById("compareBTo").value = today;
+})();
+
+function getCompareRange(letter) {
+  const preset = document.getElementById(`compare${letter}Preset`).value;
+  if (preset === "custom") {
+    const from = document.getElementById(`compare${letter}From`).value;
+    const to = document.getElementById(`compare${letter}To`).value;
+    return from && to ? { from, to } : null;
+  }
+  return periodPresetRange(preset);
+}
+
+function periodTotalVolume(rows) {
+  const byDate = {};
+  rows.forEach((r) => { byDate[r.metric_date] = Math.max(byDate[r.metric_date] || 0, r.ended_count_accum_day || 0); });
+  return Object.values(byDate).reduce((a, b) => a + b, 0);
+}
+
+// Card neutro (sem julgamento de "bom"/"ruim" — comparar dois períodos
+// arbitrários não tem um sentido único de melhora, diferente dos cards de
+// hoje x ontem). Mostra A → B e a variação percentual.
+function renderNeutralCompareCard(label, valA, valB, opts = {}) {
+  const { unit = "", isTimeSeconds = false } = opts;
+  const fmt = (v) => (isTimeSeconds ? formatSeconds(v) : `${Math.round(v)}${unit}`);
+  let deltaHtml = '<p class="comparison-card__empty">Sem dados suficientes para comparar.</p>';
+  if (valA != null && valB != null && valA !== 0) {
+    const diff = Math.round(((valB - valA) / valA) * 100);
+    const arrow = diff > 0 ? "▲" : diff < 0 ? "▼" : "＝";
+    deltaHtml = `<p class="comparison-card__delta" data-trend="neutral">${arrow} ${Math.abs(diff)}% (B vs. A)</p>`;
+  }
+  return `
+    <div class="comparison-card">
+      <p class="comparison-card__label">${label}</p>
+      <p class="comparison-card__value">${valA != null ? fmt(valA) : "–"} <span style="font-size:13px;color:var(--ink-faint);font-weight:600;">→</span> ${valB != null ? fmt(valB) : "–"}</p>
+      ${deltaHtml}
+    </div>`;
+}
+
+function renderCompareHeatmap(pivotA, pivotB) {
+  const wrap = document.getElementById("compareHeatmapWrap");
+  let maxAbsDiff = 20; // piso, evita escala de cor minúscula quando a variação real é pequena
+  const diffs = {};
+  REPORT_HOURS.forEach((hour) => {
+    diffs[hour] = [];
+    for (let i = 0; i < 7; i++) {
+      const a = pivotA[hour][i];
+      const b = pivotB[hour][i];
+      let diff = null;
+      if (a != null && b != null && a > 0) {
+        diff = ((b - a) / a) * 100;
+        if (Math.abs(diff) > maxAbsDiff) maxAbsDiff = Math.abs(diff);
+      }
+      diffs[hour].push(diff);
+    }
+  });
+
+  let html = '<div class="heatmap-grid">';
+  html += '<div class="heatmap-cell heatmap-head"></div>';
+  for (let wd = 1; wd <= 7; wd++) html += `<div class="heatmap-cell heatmap-head">${WEEKDAY_LABELS[wd]}</div>`;
+  REPORT_HOURS.forEach((hour) => {
+    html += `<div class="heatmap-cell heatmap-hour">${String(hour).padStart(2, "0")}h</div>`;
+    diffs[hour].forEach((diff) => {
+      if (diff == null) {
+        html += '<div class="heatmap-cell heatmap-empty">–</div>';
+      } else {
+        const pct = Math.min(1, Math.abs(diff) / maxAbsDiff);
+        const alpha = 0.12 + pct * 0.75;
+        const base = diff >= 0 ? [214, 116, 30] : [14, 147, 168]; // laranja = subiu em B · teal = caiu em B
+        const bg = [255, 255, 255];
+        const rgb = base.map((c, i) => Math.round(bg[i] * (1 - alpha) + c * alpha));
+        const textColor = alpha > 0.55 ? "#fff" : "var(--ink)";
+        const sign = diff >= 0 ? "+" : "";
+        html += `<div class="heatmap-cell" style="background:rgb(${rgb.join(",")});color:${textColor}" title="${WEEKDAY_LABELS[/* placeholder */1]}">${sign}${Math.round(diff)}%</div>`;
+      }
+    });
+  });
+  html += "</div>";
+  wrap.innerHTML = html;
+}
+
+let lastCompareResult = null;
+
+async function runCompare() {
+  const rangeA = getCompareRange("A");
+  const rangeB = getCompareRange("B");
+  const statusEl = document.getElementById("compareStatus");
+  const runBtn = document.getElementById("compareRunBtn");
+  statusEl.style.display = "block";
+
+  if (!rangeA || !rangeB) {
+    statusEl.textContent = 'Selecione datas válidas nos dois períodos ("de" e "até").';
+    return;
+  }
+
+  statusEl.textContent = "Buscando dados dos dois períodos…";
+  runBtn.disabled = true;
+  const originalLabel = runBtn.textContent;
+  runBtn.textContent = "Comparando…";
+
+  try {
+    const selectedQueues = loadReportsSelectedQueues();
+    const [rowsA, rowsB] = await Promise.all([
+      fetchHourlyMetrics({ fromDate: rangeA.from, toDate: rangeA.to, selectedQueues }),
+      fetchHourlyMetrics({ fromDate: rangeB.from, toDate: rangeB.to, selectedQueues }),
+    ]);
+
+    if (rowsA.length === 0 || rowsB.length === 0) {
+      statusEl.textContent = "Um dos dois períodos ainda não tem dados coletados.";
+      document.getElementById("compareResults").style.display = "none";
+      return;
+    }
+
+    const totalA = periodTotalVolume(rowsA);
+    const totalB = periodTotalVolume(rowsB);
+    const tmeA = weightedAvgBy(rowsA, "tme_seconds"), tmeB = weightedAvgBy(rowsB, "tme_seconds");
+    const tmaA = weightedAvgBy(rowsA, "tma_seconds"), tmaB = weightedAvgBy(rowsB, "tma_seconds");
+    const slA = weightedAvgBy(rowsA, "service_level"), slB = weightedAvgBy(rowsB, "service_level");
+
+    document.getElementById("compareSummaryGrid").innerHTML = [
+      renderNeutralCompareCard("Volume total", totalA, totalB),
+      renderNeutralCompareCard("TME médio", tmeA, tmeB, { isTimeSeconds: true }),
+      renderNeutralCompareCard("TMA médio", tmaA, tmaB, { isTimeSeconds: true }),
+      renderNeutralCompareCard("Nível de Serviço médio", slA, slB, { unit: "%" }),
+    ].join("");
+
+    const { matrix: pivotA } = buildHeatPivot(rowsA);
+    const { matrix: pivotB } = buildHeatPivot(rowsB);
+    renderCompareHeatmap(pivotA, pivotB);
+
+    lastCompareResult = { rangeA, rangeB, totalA, totalB, tmeA, tmeB, tmaA, tmaB, slA, slB, pivotA, pivotB, queuesLabel: exportQueuesLabel() };
+
+    document.getElementById("compareResults").style.display = "block";
+    statusEl.textContent = `Comparação pronta: ${rangeA.from} a ${rangeA.to} (A) x ${rangeB.from} a ${rangeB.to} (B).`;
+  } catch (err) {
+    console.error("[Polaris] Falha ao comparar períodos:", err);
+    statusEl.textContent = `Não foi possível comparar (${err.message}).`;
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = originalLabel;
+  }
+}
+
+function pctStr(a, b) {
+  return a ? `${b >= a ? "+" : ""}${Math.round(((b - a) / a) * 100)}%` : "–";
+}
+
+function exportCompareXlsx() {
+  if (!lastCompareResult) return;
+  const r = lastCompareResult;
+  const wb = XLSX.utils.book_new();
+
+  const summaryAOA = [
+    ["Polaris — Comparação de períodos"],
+    ["Período A", `${r.rangeA.from} a ${r.rangeA.to}`],
+    ["Período B", `${r.rangeB.from} a ${r.rangeB.to}`],
+    ["Filas incluídas", r.queuesLabel],
+    ["Gerado em", new Date().toLocaleString("pt-BR")],
+    [],
+    ["Indicador", "Período A", "Período B", "Variação (B vs. A)"],
+    ["Volume total", r.totalA, r.totalB, pctStr(r.totalA, r.totalB)],
+    ["TME médio", formatSeconds(r.tmeA), formatSeconds(r.tmeB), pctStr(r.tmeA, r.tmeB)],
+    ["TMA médio", formatSeconds(r.tmaA), formatSeconds(r.tmaB), pctStr(r.tmaA, r.tmaB)],
+    ["Nível de Serviço médio", `${Math.round(r.slA ?? 0)}%`, `${Math.round(r.slB ?? 0)}%`, pctStr(r.slA, r.slB)],
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summaryAOA), "Resumo");
+
+  function pivotAOA(pivot) {
+    const aoa = [["Hora", ...WEEKDAY_LABELS.slice(1)]];
+    REPORT_HOURS.forEach((hour) => aoa.push([`${String(hour).padStart(2, "0")}h`, ...pivot[hour].map((v) => (v != null ? Math.round(v) : ""))]));
+    return aoa;
+  }
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(pivotAOA(r.pivotA)), "Mapa de calor A");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(pivotAOA(r.pivotB)), "Mapa de calor B");
+
+  const diffAOA = [["Hora", ...WEEKDAY_LABELS.slice(1)]];
+  REPORT_HOURS.forEach((hour) => {
+    const row = [`${String(hour).padStart(2, "0")}h`];
+    for (let i = 0; i < 7; i++) {
+      const a = r.pivotA[hour][i], b = r.pivotB[hour][i];
+      row.push(a != null && b != null && a > 0 ? pctStr(a, b) : "");
+    }
+    diffAOA.push(row);
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(diffAOA), "Variação (%)");
+
+  XLSX.writeFile(wb, `polaris_comparacao_${r.rangeA.from}_vs_${r.rangeB.from}.xlsx`);
+}
+
+function exportComparePdf() {
+  if (!lastCompareResult) return;
+  const r = lastCompareResult;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape" });
+
+  doc.setFont("helvetica", "bold"); doc.setFontSize(16);
+  doc.text("Polaris — Comparação de períodos", 14, 16);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+  doc.text(`Período A: ${r.rangeA.from} a ${r.rangeA.to}`, 14, 23);
+  doc.text(`Período B: ${r.rangeB.from} a ${r.rangeB.to}`, 14, 28);
+  doc.text(`Filas incluídas: ${r.queuesLabel}`, 14, 33);
+
+  doc.autoTable({
+    startY: 39,
+    head: [["Indicador", "Período A", "Período B", "Variação (B vs. A)"]],
+    body: [
+      ["Volume total", String(r.totalA), String(r.totalB), pctStr(r.totalA, r.totalB)],
+      ["TME médio", formatSeconds(r.tmeA), formatSeconds(r.tmeB), pctStr(r.tmeA, r.tmeB)],
+      ["TMA médio", formatSeconds(r.tmaA), formatSeconds(r.tmaB), pctStr(r.tmaA, r.tmaB)],
+      ["Nível de Serviço médio", `${Math.round(r.slA ?? 0)}%`, `${Math.round(r.slB ?? 0)}%`, pctStr(r.slA, r.slB)],
+    ],
+    theme: "grid", headStyles: { fillColor: [11, 116, 136] }, margin: { left: 14, right: 14 },
+  });
+
+  doc.addPage();
+  doc.setFont("helvetica", "bold"); doc.setFontSize(13);
+  doc.text("Variação por dia da semana e horário (B em relação a A)", 14, 16);
+  doc.autoTable({
+    startY: 22,
+    head: [["Hora", ...WEEKDAY_LABELS.slice(1)]],
+    body: REPORT_HOURS.map((hour) => {
+      const row = [`${String(hour).padStart(2, "0")}h`];
+      for (let i = 0; i < 7; i++) {
+        const a = r.pivotA[hour][i], b = r.pivotB[hour][i];
+        row.push(a != null && b != null && a > 0 ? pctStr(a, b) : "–");
+      }
+      return row;
+    }),
+    theme: "grid", headStyles: { fillColor: [11, 116, 136] }, margin: { left: 14, right: 14 }, styles: { fontSize: 8, halign: "center" },
+    didParseCell: (data) => {
+      if (data.section === "body" && data.column.index > 0) {
+        const hour = REPORT_HOURS[data.row.index];
+        const a = r.pivotA[hour][data.column.index - 1];
+        const b = r.pivotB[hour][data.column.index - 1];
+        if (a != null && b != null && a > 0) {
+          const diff = ((b - a) / a) * 100;
+          const pct = Math.min(1, Math.abs(diff) / 60);
+          const alpha = 0.12 + pct * 0.75;
+          const base = diff >= 0 ? [214, 116, 30] : [14, 147, 168];
+          const bg = [255, 255, 255];
+          data.cell.styles.fillColor = base.map((c, i) => Math.round(bg[i] * (1 - alpha) + c * alpha));
+          if (alpha > 0.55) data.cell.styles.textColor = [255, 255, 255];
+        }
+      }
+    },
+  });
+
+  doc.save(`polaris_comparacao_${r.rangeA.from}_vs_${r.rangeB.from}.pdf`);
+}
+
+document.getElementById("compareRunBtn").addEventListener("click", runCompare);
+document.getElementById("compareExportXlsxBtn").addEventListener("click", exportCompareXlsx);
+document.getElementById("compareExportPdfBtn").addEventListener("click", exportComparePdf);
 
 </script>
 </body>
