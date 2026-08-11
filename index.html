@@ -248,6 +248,10 @@
   .agent-table th { text-align: left; padding: 10px 12px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; color: var(--ink-faint); border-bottom: 1px solid var(--line); }
   .agent-table td { padding: 12px 12px; border-bottom: 1px solid var(--line); color: var(--ink); }
   .agent-table tr:last-child td { border-bottom: none; }
+  .agent-table__assunto {
+    max-width: 260px; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; cursor: help;
+  }
   .agent-table td.tempo-warning { color: var(--amber); font-weight: 700; }
   .agent-table td.tempo-critical { color: var(--red-crit); font-weight: 700; }
   .agent-table a { color: var(--indigo-700); text-decoration: none; font-weight: 700; }
@@ -541,9 +545,9 @@
       </div>
       <div class="table-wrap">
         <table class="agent-table">
-          <thead><tr><th>Analista</th><th>Cliente</th><th>Fila</th><th>Tempo</th></tr></thead>
+          <thead><tr><th>Analista</th><th>Cliente</th><th id="agentAssuntoHeader">Assunto</th><th>Fila</th><th>Tempo</th></tr></thead>
           <tbody id="agentTableBody">
-            <tr><td colspan="4"><div class="empty-state"><span>Carregando…</span></div></td></tr>
+            <tr><td colspan="5"><div class="empty-state"><span>Carregando…</span></div></td></tr>
           </tbody>
         </table>
       </div>
@@ -661,6 +665,11 @@
           <label>Exibir tabela no painel</label>
           <label class="switch"><input type="checkbox" id="agentTmaTableEnabled" /><span class="switch__track"><span class="switch__thumb"></span></span></label>
         </div>
+        <div class="field field--switch">
+          <label>Exibir assunto e link do chat na tabela</label>
+          <label class="switch"><input type="checkbox" id="agentShowSubjectLink" /><span class="switch__track"><span class="switch__thumb"></span></span></label>
+        </div>
+        <p class="field__hint">Fonte: coluna "Assunto" e "Link" do Painel RC. Se desativado, a tabela mostra só Analista, Cliente, Fila e Tempo.</p>
       </div>
 
       <div class="card">
@@ -917,6 +926,7 @@ const DEFAULT_SETTINGS = {
   lossesWarnThreshold: 1,
   similarIssuesEnabled: false,
   agentTmaTableEnabled: true,
+  agentShowSubjectLink: true,
 };
 
 const LS_KEY = "orionWebSettings";
@@ -1035,6 +1045,7 @@ const f = {
   lossesWarnThreshold: document.getElementById("lossesWarnThreshold"),
   similarIssuesEnabled: document.getElementById("similarIssuesEnabled"),
   agentTmaTableEnabled: document.getElementById("agentTmaTableEnabled"),
+  agentShowSubjectLink: document.getElementById("agentShowSubjectLink"),
 };
 const queueListEl = document.getElementById("queueList");
 const savedMsg = document.getElementById("savedMsg");
@@ -1065,6 +1076,11 @@ function applyAgentSectionVisibility(settings) {
   if (section) section.style.display = settings.agentTmaTableEnabled ? "" : "none";
 }
 
+function applyAgentSubjectColumnVisibility(settings) {
+  const header = document.getElementById("agentAssuntoHeader");
+  if (header) header.style.display = settings.agentShowSubjectLink ? "" : "none";
+}
+
 let currentSettings = loadSettings();
 
 function fillForm(s) {
@@ -1080,11 +1096,13 @@ function fillForm(s) {
   f.lossesWarnThreshold.value = s.lossesWarnThreshold;
   f.similarIssuesEnabled.checked = s.similarIssuesEnabled;
   f.agentTmaTableEnabled.checked = s.agentTmaTableEnabled;
+  f.agentShowSubjectLink.checked = s.agentShowSubjectLink;
   buildQueueChecklist(s.selectedQueues);
   updateQueueChip(s);
 }
 fillForm(currentSettings);
 applyAgentSectionVisibility(currentSettings);
+applyAgentSubjectColumnVisibility(currentSettings);
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -1102,10 +1120,12 @@ form.addEventListener("submit", (e) => {
     lossesWarnThreshold: Math.max(1, parseInt(f.lossesWarnThreshold.value, 10) || DEFAULT_SETTINGS.lossesWarnThreshold),
     similarIssuesEnabled: f.similarIssuesEnabled.checked,
     agentTmaTableEnabled: f.agentTmaTableEnabled.checked,
+    agentShowSubjectLink: f.agentShowSubjectLink.checked,
   };
   saveSettingsToStorage(currentSettings);
   updateQueueChip(currentSettings);
   applyAgentSectionVisibility(currentSettings);
+  applyAgentSubjectColumnVisibility(currentSettings);
   savedMsg.style.display = "block";
   setTimeout(() => (savedMsg.style.display = "none"), 2500);
 });
@@ -1285,6 +1305,8 @@ async function refreshPanel() {
   const agentTableBody = document.getElementById("agentTableBody");
   const agentError = document.getElementById("agentError");
   applyAgentSectionVisibility(settings);
+  applyAgentSubjectColumnVisibility(settings);
+  const colCount = settings.agentShowSubjectLink ? 5 : 4;
   if (!settings.agentTmaTableEnabled) {
     // Desativado nas configurações: nem consulta o proxy do Painel RC pra essa tabela.
     return;
@@ -1306,7 +1328,7 @@ async function refreshPanel() {
     if (rows.length === 0) {
       const tr = document.createElement("tr");
       const td = document.createElement("td");
-      td.colSpan = 4;
+      td.colSpan = colCount;
       td.innerHTML = `<div class="empty-state">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <strong>Nenhum analista acima do tempo limite</strong>
@@ -1317,11 +1339,15 @@ async function refreshPanel() {
     } else {
       rows.forEach((r) => {
         const tr = document.createElement("tr");
-        const href = r.Cliente__href || r.Analista__href;
+        // "Link" é a coluna dedicada do Painel RC com o link do chat.
+        // Cliente__href/Analista__href ficam como fallback, caso a
+        // estrutura da fonte mude e o link volte a vir embutido numa
+        // dessas colunas em vez de numa coluna própria.
+        const href = r.Link__href || r.Cliente__href || r.Analista__href;
         const analistaTd = document.createElement("td");
         if (href) {
           const a = document.createElement("a");
-          a.href = href; a.target = "_blank"; a.textContent = r.Analista || "–";
+          a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = r.Analista || "–";
           analistaTd.appendChild(a);
         } else {
           analistaTd.textContent = r.Analista || "–";
@@ -1329,14 +1355,23 @@ async function refreshPanel() {
         const clienteTd = document.createElement("td"); clienteTd.textContent = r.Cliente || "–";
         const filaTd = document.createElement("td"); filaTd.textContent = r.Fila || "–";
         const tempoTd = document.createElement("td"); tempoTd.textContent = r.Tempo || "–"; tempoTd.className = tempoCellClass(r.__level);
-        tr.append(analistaTd, clienteTd, filaTd, tempoTd);
+
+        if (settings.agentShowSubjectLink) {
+          const assuntoTd = document.createElement("td");
+          assuntoTd.className = "agent-table__assunto";
+          assuntoTd.textContent = r.Assunto || "–";
+          assuntoTd.title = r.Assunto || "";
+          tr.append(analistaTd, clienteTd, assuntoTd, filaTd, tempoTd);
+        } else {
+          tr.append(analistaTd, clienteTd, filaTd, tempoTd);
+        }
         agentTableBody.appendChild(tr);
       });
     }
   } catch (err) {
     agentError.style.display = "flex";
     agentError.textContent = `Falha ao buscar dados do Painel RC via proxy (${err.message}).`;
-    agentTableBody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><span>Sem dados.</span></div></td></tr>';
+    agentTableBody.innerHTML = `<tr><td colspan="${colCount}"><div class="empty-state"><span>Sem dados.</span></div></td></tr>`;
   }
 }
 
