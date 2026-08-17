@@ -3054,7 +3054,8 @@ document.getElementById("compareExportPdfBtn").addEventListener("click", exportC
   const adminModal = document.getElementById('polaris-admin-modal');
   const adminMessage = document.getElementById('polaris-admin-message');
   const allowed = (email) => /@(linx\.com\.br|totvs\.com\.br)$/i.test(String(email || '').trim());
-  const setMessage = (text, ok = false) => { message.textContent = text; message.style.color = ok ? '#147a54' : '#a3342a'; };
+  const setMessage = (text, ok = false) => { message.textContent = text; message.style.color = ok ? '#147a54' : '#a3342a'; message.style.display = 'block'; };
+  const authErrorMessage = (error) => { const code = error?.error_code || error?.code || ''; const msg = String(error?.message || error?.msg || '').toLowerCase(); if (code === 'invalid_credentials' || msg.includes('invalid login credentials')) return 'E-mail ou senha inválidos.'; if (code === 'email_not_confirmed' || msg.includes('email not confirmed')) return 'Confirme seu e-mail antes de entrar.'; if (msg.includes('rate limit')) return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.'; if (msg.includes('failed to fetch') || msg.includes('network')) return 'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.'; return error?.message || error?.msg || 'Não foi possível concluir o login. Tente novamente.'; };
   const setAdminMessage = (text, ok = false) => { adminMessage.textContent = text; adminMessage.style.color = ok ? '#147a54' : '#a3342a'; };
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -3083,12 +3084,26 @@ document.getElementById("compareExportPdfBtn").addEventListener("click", exportC
   }
 
   form.addEventListener('submit', async (event) => {
-    event.preventDefault(); setMessage('Validando acesso…');
-    const email = emailInput.value.trim().toLowerCase();
-    if (!allowed(email)) return setMessage('Somente e-mails @linx.com.br e @totvs.com.br são permitidos.');
-    const { data, error } = await sb.auth.signInWithPassword({ email, password: passwordInput.value });
-    if (error) return setMessage('Não foi possível entrar. Confira e-mail, senha e confirmação do cadastro.');
-    try { await enter(data.session); } catch (err) { await sb.auth.signOut(); setMessage(err.message || 'Acesso não autorizado.'); }
+    event.preventDefault();
+    const submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    setMessage('Validando acesso…');
+    try {
+      const email = emailInput.value.trim().toLowerCase();
+      if (!allowed(email)) return setMessage('Somente e-mails @linx.com.br e @totvs.com.br são permitidos.');
+      if (!passwordInput.value) return setMessage('Informe sua senha.');
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: passwordInput.value });
+      if (error) return setMessage(authErrorMessage(error));
+      if (!data?.session) return setMessage('Login não concluído: o servidor não retornou uma sessão.');
+      await enter(data.session);
+      setMessage('Acesso autorizado.', true);
+    } catch (err) {
+      console.error('[Polaris] Falha no login:', err);
+      try { await sb.auth.signOut(); } catch {}
+      setMessage(authErrorMessage(err));
+    } finally {
+      submit.disabled = false;
+    }
   });
 
   document.getElementById('polaris-signup-btn').addEventListener('click', async () => {
