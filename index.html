@@ -511,7 +511,7 @@ body.tv-mode #panel-painel .topic-pill__count { font-size: clamp(22px, 2.4vw, 42
     <div class="polaris-auth-mark"><img src="polaris-logo.png" alt="Logo Polaris" /></div>
     <p class="polaris-auth-kicker">POLARIS • ACESSO RESTRITO</p>
     <h1>Entrar no painel</h1>
-    <p class="polaris-auth-copy">Use seu e-mail corporativo Linx ou TOTVS. O cadastro só é efetivado após confirmação do e-mail.</p>
+    <p class="polaris-auth-copy">Entre com seu acesso corporativo ao Polaris ou solicite uma nova autorização.</p>
     <form id="polaris-login-form" class="polaris-auth-form">
       <label>E-mail corporativo<input id="polaris-email" type="email" autocomplete="email" required placeholder="nome@linx.com.br" /></label>
       <label>Senha<input id="polaris-password" type="password" autocomplete="current-password" required minlength="8" placeholder="Mínimo de 8 caracteres" /></label>
@@ -531,9 +531,9 @@ body.tv-mode #panel-painel .topic-pill__count { font-size: clamp(22px, 2.4vw, 42
 <div id="polaris-account-modal" class="polaris-admin-modal" hidden><div class="polaris-admin-card" style="max-width:460px"><div class="polaris-admin-head"><div><p class="polaris-auth-kicker">MINHA CONTA</p><h2>Alterar minha senha</h2></div><button type="button" id="polaris-account-close" class="btn btn--ghost">Fechar</button></div><p class="card__note">Você pode alterar somente a sua própria senha.</p><form id="polaris-account-form" class="polaris-auth-form"><label>Nova senha<input id="polaris-account-password" type="password" minlength="8" required autocomplete="new-password"></label><label>Confirme a nova senha<input id="polaris-account-password-confirm" type="password" minlength="8" required autocomplete="new-password"></label><button type="submit" class="btn btn--primary">Salvar nova senha</button><p id="polaris-account-message" class="polaris-auth-message" role="status"></p></form></div></div><div id="polaris-admin-modal" class="polaris-admin-modal" hidden>
   <div class="polaris-admin-card">
     <div class="polaris-admin-head"><div><p class="polaris-auth-kicker">ADMINISTRAÇÃO</p><h2>Usuários e permissões</h2></div><button id="polaris-admin-close" class="polaris-auth-link">Fechar</button></div>
-    <div class="polaris-admin-tabs"><button data-admin-tab="users" class="is-active">Usuários</button><button data-admin-tab="roles">Perfis e telas</button><button data-admin-tab="learning">Aprendizado</button></div>
+    <div class="polaris-admin-tabs"><button data-admin-tab="users" class="is-active">Usuários</button><button data-admin-tab="roles">Perfis e telas</button><button data-admin-tab="requests">Solicitações</button><button data-admin-tab="learning">Aprendizado</button></div>
     <section id="polaris-admin-users"><form id="polaris-user-form" class="polaris-admin-form"><input id="admin-user-email" type="email" required placeholder="e-mail @linx.com.br ou @totvs.com.br"/><input id="admin-user-name" required placeholder="Nome completo"/><input id="admin-user-password" type="password" minlength="8" placeholder="Senha prévia (opcional)" autocomplete="new-password"/><select id="admin-user-role"><option value="user">Usuário</option><option value="admin">Administrador</option></select><button class="polaris-auth-submit">Criar acesso</button></form><p style="font-size:12px;color:#5a6b70;margin-top:8px">Com senha prévia, o usuário entra imediatamente. Sem senha, ele recebe um convite para definir a própria senha.</p><div id="polaris-users-list"></div></section>
-    <section id="polaris-admin-roles" hidden><form id="polaris-role-form" class="polaris-admin-form"><input id="admin-role-name" required placeholder="Nome do perfil"/><input id="admin-role-label" required placeholder="Rótulo do perfil"/><button class="polaris-auth-submit">Criar perfil</button></form><div id="polaris-roles-list"></div></section><section id="polaris-admin-learning" hidden><p class="card__note">Aqui aparecem apenas agrupamentos recorrentes ainda não classificados. O texto fica restrito ao master; nada é aplicado até você revisar e aprovar.</p><div id="polaris-learning-list"><p>Abra esta aba para carregar candidatos.</p></div></section>
+    <section id="polaris-admin-roles" hidden><form id="polaris-role-form" class="polaris-admin-form"><input id="admin-role-name" required placeholder="Nome do perfil"/><input id="admin-role-label" required placeholder="Rótulo do perfil"/><button class="polaris-auth-submit">Criar perfil</button></form><div id="polaris-roles-list"></div></section><section id="polaris-admin-requests" hidden><p class="card__note">Solicitações feitas pela tela de login. O acesso só é criado depois da aprovação do master.</p><div id="polaris-access-requests-list"><p>Abra esta aba para carregar solicitações.</p></div></section><section id="polaris-admin-learning" hidden><p class="card__note">Aqui aparecem apenas agrupamentos recorrentes ainda não classificados. O texto fica restrito ao master; nada é aplicado até você revisar e aprovar.</p><div id="polaris-learning-list"><p>Abra esta aba para carregar candidatos.</p></div></section>
     <p id="polaris-admin-message" class="polaris-auth-message"></p>
   </div>
 </div>
@@ -3272,12 +3272,26 @@ document.getElementById("compareViewMode")?.addEventListener("change", applyComp
 document.getElementById("compareGranularity")?.addEventListener("change", () => { if (lastCompareResult) renderCompareBars({ ...lastCompareResult, rowsA: lastCompareResult.rowsA || [], rowsB: lastCompareResult.rowsB || [] }); });
 
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-(() => {
+<script data-cfasync="false" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script data-cfasync="false">
+(async () => {
+  async function waitForSupabase() {
+    for (let i = 0; i < 100; i += 1) {
+      if (window.supabase?.createClient) return window.supabase;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    const fallback = document.createElement('script');
+    fallback.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+    fallback.async = false;
+    fallback.setAttribute('data-cfasync', 'false');
+    await new Promise((resolve, reject) => { fallback.onload = resolve; fallback.onerror = reject; document.head.appendChild(fallback); });
+    if (!window.supabase?.createClient) throw new Error('SDK Supabase não carregou.');
+    return window.supabase;
+  }
+  const supabaseLib = await waitForSupabase();
   const SUPABASE_URL = window.POLARIS_CONFIG?.url || "https://SEU-PROJETO-COPIA.supabase.co";
   const SUPABASE_KEY = window.POLARIS_CONFIG?.publishableKey || "COLOQUE_A_CHAVE_PUBLICA_DA_COPIA";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const sb = supabaseLib.createClient(SUPABASE_URL, SUPABASE_KEY);
   window.sb = sb;
   window.polarisSupabase = sb;
   const gate = document.getElementById('polaris-auth-gate');
@@ -3350,11 +3364,11 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
 
   document.getElementById('polaris-signup-btn').addEventListener('click', async () => {
     const email = emailInput.value.trim().toLowerCase();
-    if (!allowed(email)) return setMessage('Informe um e-mail @linx.com.br ou @totvs.com.br para solicitar cadastro.');
-    if (passwordInput.value.length < 8) return setMessage('Informe uma senha com pelo menos 8 caracteres.');
-    setMessage('Enviando confirmação para seu e-mail…');
-    const { error } = await sb.auth.signUp({ email, password: passwordInput.value, options: { emailRedirectTo: appRedirectUrl() } });
-    setMessage(error ? 'Não foi possível solicitar o cadastro. Verifique o e-mail informado.' : 'Cadastro solicitado. Confirme o link recebido por e-mail antes de entrar.', !error);
+    if (!allowed(email)) return setMessage('Informe um e-mail corporativo válido para solicitar acesso.');
+    setMessage('Enviando solicitação para aprovação…');
+    const { error } = await sb.from('polaris_access_requests').insert({ email, full_name: '' });
+    if (error?.code === '23505') return setMessage('Já existe uma solicitação pendente para este e-mail.');
+    setMessage(error ? 'Não foi possível enviar a solicitação. Tente novamente.' : 'Solicitação enviada. O acesso será liberado após a aprovação do administrador.', !error);
   });
 
   document.getElementById('polaris-reset-btn').addEventListener('click', async () => {
@@ -3391,7 +3405,9 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
     document.querySelectorAll('[data-admin-tab]').forEach((x) => x.classList.toggle('is-active', x === tab));
     document.getElementById('polaris-admin-users').hidden = tab.dataset.adminTab !== 'users';
     document.getElementById('polaris-admin-roles').hidden = tab.dataset.adminTab !== 'roles';
+    document.getElementById('polaris-admin-requests').hidden = tab.dataset.adminTab !== 'requests';
     document.getElementById('polaris-admin-learning').hidden = tab.dataset.adminTab !== 'learning';
+    if (tab.dataset.adminTab === 'requests') loadAccessRequests();
     if (tab.dataset.adminTab === 'learning') loadLearningCandidates();
   }));
   async function loadLearningCandidates() {
@@ -3413,6 +3429,22 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
     }));
   }
 
+  async function loadAccessRequests() {
+    const list = document.getElementById('polaris-access-requests-list'); list.textContent = 'Carregando…';
+    const { data, error } = await sb.from('polaris_access_requests').select('id,email,full_name,status,created_at').eq('status', 'pending').order('created_at', { ascending: false }).limit(50);
+    if (error) return list.textContent = 'Não foi possível carregar as solicitações.';
+    list.innerHTML = (data || []).map((r) => `<div class="polaris-admin-row" style="grid-template-columns:1.4fr 1fr 130px 100px"><span><strong>${esc(r.email)}</strong><br><small>${esc(r.full_name || 'Nome não informado')} · ${esc(new Date(r.created_at).toLocaleString('pt-BR'))}</small></span><input type="password" data-request-password="${esc(r.id)}" minlength="8" placeholder="Senha inicial" autocomplete="new-password"/><select data-request-role="${esc(r.id)}"><option value="user">Usuário</option><option value="admin">Administrador</option></select><span style="display:flex;gap:6px"><button type="button" data-request-approve="${esc(r.id)}">Aprovar</button><button type="button" data-request-reject="${esc(r.id)}">Recusar</button></span></div>`).join('') || '<p>Nenhuma solicitação pendente.</p>';
+    list.querySelectorAll('[data-request-approve]').forEach((btn) => btn.addEventListener('click', async () => {
+      const id = btn.dataset.requestApprove; const request = (data || []).find((x) => x.id === id); const password = list.querySelector(`[data-request-password="${id}"]`).value; const role = list.querySelector(`[data-request-role="${id}"]`).value;
+      if (!request || password.length < 8) return setAdminMessage('Defina uma senha inicial com pelo menos 8 caracteres.');
+      btn.disabled = true; setAdminMessage('Criando o acesso aprovado…');
+      const { data: created, error: createError } = await sb.functions.invoke('admin-invite-v4', { body: { email: request.email, full_name: request.full_name || request.email.split('@')[0], password, role, redirect_to: appRedirectUrl(), app_name: appName } });
+      if (createError) { btn.disabled = false; return setAdminMessage(`Falha ao criar acesso: ${createError.message || 'operação não autorizada.'}`); }
+      const { error: updateError } = await sb.from('polaris_access_requests').update({ status: 'approved', reviewed_by: polarisUserId, reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString(), notes: created?.message || null }).eq('id', id).eq('status', 'pending');
+      setAdminMessage(updateError ? 'Acesso criado, mas a solicitação não foi encerrada.' : 'Solicitação aprovada e acesso criado com a senha inicial.', !updateError); loadAccessRequests();
+    }));
+    list.querySelectorAll('[data-request-reject]').forEach((btn) => btn.addEventListener('click', async () => { const id = btn.dataset.requestReject; const { error: rejectError } = await sb.from('polaris_access_requests').update({ status: 'rejected', reviewed_by: polarisUserId, reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', id).eq('status', 'pending'); setAdminMessage(rejectError ? 'Não foi possível recusar a solicitação.' : 'Solicitação recusada.', !rejectError); loadAccessRequests(); }));
+  }
   async function loadUsers() {
     const list = document.getElementById('polaris-users-list'); list.textContent = 'Carregando…';
     const { data, error } = await sb.from('app_profiles').select('id,email,full_name,role,is_active,created_at').order('created_at', { ascending: false });
