@@ -414,12 +414,36 @@
   .app-footer__version { margin: 0; font-size: 11px; font-weight: 800; color: var(--ink-faint); letter-spacing: .3px; }
   .app-footer__credit { margin: 2px 0 0; font-size: 10.5px; color: var(--ink-faint); }
 
-  .history-chart { margin-top: 12px; overflow-x: auto; }
-  .history-chart__bars { display: flex; align-items: flex-end; gap: 3px; height: 64px; min-width: min-content; }
-  .history-chart__bar { flex: 0 0 auto; width: 10px; min-height: 2px; border-radius: 3px 3px 0 0; background: var(--teal-600); }
-  .history-chart__bar.is-empty { background: var(--line); }
-  .history-chart__bar.is-today { background: var(--cyan-500); }
-  .history-chart__labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; color: var(--ink-faint); }
+  .reports-toolbar { display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-top:12px; }
+  .reports-toolbar .field { min-width:220px; }
+  .history-legend { display:flex; gap:14px; align-items:center; color:var(--ink-soft); font-size:11px; padding-bottom:8px; }
+  .history-dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; vertical-align:-1px; background:var(--teal-600); }
+  .history-dot--today { background:var(--cyan-500); }
+  .history-chart { margin-top:14px; overflow-x:auto; padding:14px 2px 4px; border-top:1px solid var(--line); }
+  .history-chart__bars { display:flex; align-items:flex-end; gap:8px; height:236px; min-width:max-content; padding:0 8px; }
+  .history-chart__item { flex:0 0 58px; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:5px; }
+  .history-chart__value { font-size:10px; color:var(--ink-soft); font-weight:800; min-height:14px; }
+  .history-chart__bar-wrap { height:190px; width:100%; display:flex; align-items:flex-end; justify-content:center; }
+  .history-chart__bar { width:38px; min-height:3px; border-radius:6px 6px 2px 2px; background:linear-gradient(180deg,var(--cyan-500),var(--teal-600)); box-shadow:0 3px 8px rgba(11,116,136,.16); }
+  .history-chart__bar.is-empty { background:var(--line); box-shadow:none; }
+  .history-chart__bar.is-today { background:linear-gradient(180deg,#44e0ef,var(--cyan-500)); }
+  .history-chart__label { font-size:10px; color:var(--ink-faint); white-space:nowrap; }
+  .history-chart__meta { margin:12px 8px 0; font-size:11px; color:var(--ink-faint); }
+  .compare-bars-section { margin-top:18px; border:1px solid var(--line); border-radius:14px; padding:14px; overflow:hidden; }
+  .compare-bars-section h3 { margin:0 0 4px; font-size:15px; }
+  .compare-bars-section p { margin:0 0 12px; font-size:11px; color:var(--ink-faint); }
+  .compare-vertical-scroll { overflow-x:auto; padding:8px 4px 6px; }
+  .compare-vertical-chart { display:flex; align-items:flex-end; gap:14px; min-width:max-content; min-height:270px; }
+  .compare-vertical-group { flex:0 0 84px; height:270px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:5px; }
+  .compare-vertical-bars { height:220px; width:100%; display:flex; align-items:flex-end; justify-content:center; gap:5px; }
+  .compare-vertical-bar { width:31px; min-height:4px; border-radius:5px 5px 2px 2px; position:relative; display:flex; justify-content:center; align-items:flex-start; }
+  .compare-vertical-bar span { position:absolute; top:-17px; font-size:9px; font-weight:800; white-space:nowrap; color:var(--ink-soft); }
+  .compare-vertical-bar.a { background:linear-gradient(180deg,#39c9dc,var(--teal-600)); }
+  .compare-vertical-bar.b { background:linear-gradient(180deg,#f3ad6c,#d6741e); }
+  .compare-vertical-label { font-size:10px; color:var(--ink-faint); white-space:nowrap; }
+  .compare-vertical-legend { display:flex; gap:12px; font-size:11px; color:var(--ink-soft); margin:8px 0 0; }
+  .compare-vertical-legend strong:first-child { color:var(--teal-600); }
+  .compare-vertical-legend strong:last-child { color:#d6741e; }
 </style>
 <style>
 .polaris-auth-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;background:radial-gradient(circle at 20% 20%,#153a45,#07151b 55%,#040a0d);padding:24px}.polaris-auth-card,.polaris-admin-card{width:min(460px,100%);background:#f8fbfc;border:1px solid rgba(255,255,255,.25);border-radius:22px;box-shadow:0 24px 80px #0008;padding:34px;color:#102229}.polaris-auth-mark{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;background:#0b7488;color:#fff;font-weight:800;font-size:25px;overflow:hidden}.polaris-auth-mark img{width:100%;height:100%;object-fit:cover}.polaris-auth-kicker{font-size:11px;letter-spacing:.16em;font-weight:800;color:#0b7488;margin:22px 0 8px}.polaris-auth-card h1,.polaris-admin-card h2{margin:0 0 10px}.polaris-auth-copy{color:#5a6b70;line-height:1.55}.polaris-auth-form,.polaris-admin-form{display:grid;gap:12px;margin-top:22px}.polaris-auth-form label{display:grid;gap:6px;font-size:13px;font-weight:700}.polaris-auth-form input,.polaris-admin-form input,.polaris-admin-form select{border:1px solid #cbd8dc;border-radius:10px;padding:12px;background:#fff;font:inherit}.polaris-auth-submit,.polaris-auth-secondary{border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}.polaris-auth-submit{background:#0b7488;color:#fff}.polaris-auth-secondary{background:#e6f1f3;color:#0b5a69}.polaris-auth-link{border:0;background:none;color:#0b7488;cursor:pointer;text-decoration:underline}.polaris-auth-message{min-height:20px;font-size:13px;color:#a3342a}.polaris-auth-form[hidden]{display:none!important}.tv-mode-btn svg{width:19px;height:19px}.tv-settings-card{border:1px solid rgba(11,116,136,.18)}body.tv-mode .header__right,body.tv-mode #reportsToggleBtn,body.tv-mode #monitorToggleBtn,body.tv-mode #panelToggleBtn,body.tv-mode #polaris-admin-open{display:none!important}body.tv-mode .header{justify-content:space-between}body.tv-mode .header__brand{display:flex!important;align-items:center}body.tv-mode #panel-config,body.tv-mode #panel-reports,body.tv-mode #panel-monitor{display:none!important}body.tv-mode #panel-painel{display:block!important;max-width:1600px;margin:0 auto}body.tv-mode .app{padding:0}.compare-bars-wrap{display:grid;gap:12px}.compare-bar-row{display:grid;grid-template-columns:180px 1fr 1fr 120px;gap:10px;align-items:center;font-size:12px}.compare-bar-track{height:18px;background:#e7eff1;border-radius:99px;overflow:hidden}.compare-bar-fill{height:100%;border-radius:99px}.compare-bar-fill.a{background:#0b7488}.compare-bar-fill.b{background:#ed8b3a}@media(max-width:700px){.compare-bar-row{grid-template-columns:1fr}}.polaris-admin-modal[hidden]{display:none!important}.polaris-auth-gate[hidden]{display:none!important}.polaris-admin-modal{position:fixed;inset:0;z-index:9999;background:#07151bcc;display:grid;place-items:center;padding:24px}.polaris-admin-card{width:min(980px,100%);max-height:90vh;overflow:auto}.polaris-admin-head{display:flex;justify-content:space-between;align-items:start}.polaris-admin-tabs{display:flex;gap:8px;border-bottom:1px solid #d9e2e5;margin:22px 0;padding-bottom:8px}.polaris-admin-tabs button{border:0;background:none;padding:8px 12px;cursor:pointer}.polaris-admin-tabs button.is-active{color:#0b7488;border-bottom:2px solid #0b7488;font-weight:800}.polaris-admin-form{grid-template-columns:repeat(4,1fr)}.polaris-admin-form button{border:0;border-radius:10px;background:#0b7488;color:#fff;font-weight:800}.polaris-admin-row{display:grid;grid-template-columns:1.5fr 1fr 120px 100px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #e5edef}.polaris-admin-row button{border:1px solid #b9c9ce;background:#fff;border-radius:8px;padding:7px;cursor:pointer}@media(max-width:700px){.polaris-admin-form{grid-template-columns:1fr}.polaris-admin-row{grid-template-columns:1fr}}
@@ -852,6 +876,13 @@
         <span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
         <h2>Período do histórico</h2>
       </div>
+      <div class="reports-toolbar">
+        <div class="field"><label for="historyRangePreset">Exibir</label><select id="historyRangePreset">
+          <option value="last10">Últimos 10 dias</option><option value="thisWeek">Semana atual</option><option value="lastWeek">Semana anterior</option>
+          <option value="thisMonth">Mês atual</option><option value="lastMonth">Mês anterior</option><option value="thisYear">Ano atual</option><option value="lastYear">Ano anterior</option><option value="all">Todo o histórico</option>
+        </select></div>
+        <div class="history-legend"><span><i class="history-dot history-dot--volume"></i>Volume</span><span><i class="history-dot history-dot--today"></i>Hoje</span></div>
+      </div>
       <p id="historyRangeText" class="reports-hint">Carregando…</p>
       <div id="historyRangeChart" class="history-chart"></div>
     </div>
@@ -919,7 +950,7 @@
           </div>
         </div>
       </div>
-      <div class="field-grid" style="margin-top:12px;"><div class="field"><label>Métrica principal</label><select id="compareMetric"><option value="volume">Volume de atendimentos</option><option value="tme">TME médio</option><option value="tma">TMA médio</option><option value="service_level">Nível de serviço</option></select></div><div class="field"><label>Visualização</label><select id="compareViewMode"><option value="all">Resumo + barras + mapa percentual</option><option value="values">Valores A/B</option><option value="percent">Somente percentual</option><option value="bars">Barras lado a lado</option></select></div></div>
+      <div class="field-grid" style="margin-top:12px;"><div class="field"><label>Métrica principal</label><select id="compareMetric"><option value="volume">Volume de atendimentos</option><option value="tme">TME médio</option><option value="tma">TMA médio</option><option value="service_level">Nível de serviço</option></select></div><div class="field"><label>Visualização</label><select id="compareViewMode"><option value="all">Resumo + barras + mapa percentual</option><option value="values">Valores A/B</option><option value="percent">Somente percentual</option><option value="bars">Barras verticais lado a lado</option></select></div><div class="field"><label>Detalhamento das barras</label><select id="compareGranularity"><option value="general">Geral — total do período</option><option value="daily">Detalhado — dia a dia</option></select></div></div>
       <div class="actions"><button type="button" id="compareRunBtn" class="btn btn--primary">Comparar</button></div>
       <p id="compareStatus" class="reports-hint" style="display:none;"></p>
 
@@ -2357,34 +2388,57 @@ function renderForecast(all) {
   tbody.innerHTML = rowsHtml || '<tr><td colspan="4" class="reports-empty">Sem horários com histórico suficiente ainda.</td></tr>';
 }
 
+function isoDateLocal(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+function shiftLocalDays(date, amount) { const d = new Date(date); d.setDate(d.getDate() + amount); return d; }
+function historyRangeBounds(preset, all) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const weekday = today.getDay() || 7;
+  const monday = shiftLocalDays(today, 1 - weekday);
+  if (preset === "last10") return { from: isoDateLocal(shiftLocalDays(today, -9)), to: isoDateLocal(today), label: "últimos 10 dias", group: "day" };
+  if (preset === "thisWeek") return { from: isoDateLocal(monday), to: isoDateLocal(today), label: "semana atual", group: "day" };
+  if (preset === "lastWeek") return { from: isoDateLocal(shiftLocalDays(monday, -7)), to: isoDateLocal(shiftLocalDays(monday, -1)), label: "semana anterior", group: "day" };
+  if (preset === "thisMonth") return { from: isoDateLocal(new Date(today.getFullYear(), today.getMonth(), 1)), to: isoDateLocal(today), label: "mês atual", group: "day" };
+  if (preset === "lastMonth") return { from: isoDateLocal(new Date(today.getFullYear(), today.getMonth() - 1, 1)), to: isoDateLocal(new Date(today.getFullYear(), today.getMonth(), 0)), label: "mês anterior", group: "day" };
+  if (preset === "thisYear") return { from: isoDateLocal(new Date(today.getFullYear(), 0, 1)), to: isoDateLocal(today), label: "ano atual", group: "month" };
+  if (preset === "lastYear") return { from: isoDateLocal(new Date(today.getFullYear() - 1, 0, 1)), to: isoDateLocal(new Date(today.getFullYear() - 1, 11, 31)), label: "ano anterior", group: "month" };
+  const dates = [...new Set(all.map(r => r.metric_date).filter(Boolean))].sort();
+  return { from: dates[0] || isoDateLocal(today), to: dates[dates.length - 1] || isoDateLocal(today), label: "todo o histórico", group: "day" };
+}
+function historyDayBuckets(rows, from, to) {
+  const map = {};
+  rows.filter(r => r.metric_date >= from && r.metric_date <= to).forEach(r => { (map[r.metric_date] ||= []).push(r); });
+  return Object.keys(map).sort().map(date => ({ date, rows: map[date], total: Math.max(0, ...map[date].map(r => Number(r.ended_count_accum_day) || 0)) }));
+}
 function renderHistoryRange(all) {
   const el = document.getElementById("historyRangeText");
   const chartEl = document.getElementById("historyRangeChart");
-  if (all.length === 0) {
-    el.textContent = "Nenhum dado coletado ainda. A coleta automática roda a cada 5 minutos — volte em breve.";
-    chartEl.innerHTML = "";
-    return;
+  if (!all.length) { el.textContent = "Nenhum dado coletado ainda. A coleta automática roda a cada 5 minutos — volte em breve."; chartEl.innerHTML = ""; return; }
+  const preset = document.getElementById("historyRangePreset")?.value || "last10";
+  const bounds = historyRangeBounds(preset, all);
+  const days = historyDayBuckets(all, bounds.from, bounds.to);
+  if (!days.length) { el.innerHTML = `Não há dados disponíveis para <strong>${bounds.label}</strong> (${bounds.from} a ${bounds.to}).`; chartEl.innerHTML = ""; return; }
+  let buckets = days;
+  if (bounds.group === "month") {
+    const monthMap = {};
+    days.forEach(day => { const key = day.date.slice(0, 7); (monthMap[key] ||= []).push(...day.rows); });
+    buckets = Object.keys(monthMap).sort().map(key => ({ date:key, label:key, rows:monthMap[key], total:Math.max(0, ...monthMap[key].map(r => Number(r.ended_count_accum_day) || 0)) }));
   }
+  const maxVal = Math.max(1, ...buckets.map(b => b.total));
   const today = todayLocalISODate();
-  const totalsByDate = {};
-  all.forEach((r) => {
-    totalsByDate[r.metric_date] = Math.max(totalsByDate[r.metric_date] || 0, r.ended_count_accum_day || 0);
-  });
-  const dates = Object.keys(totalsByDate).sort();
-  const days = dates.length;
-  el.innerHTML = `Histórico de <strong>${days} dia${days > 1 ? "s" : ""}</strong>, de <strong>${dates[0]}</strong> até <strong>${dates[dates.length - 1]}</strong>. Quanto mais dias, mais precisos ficam os comparativos, o mapa de calor e a previsão.`;
-
-  // Mini gráfico: uma barra por dia coletado, altura proporcional ao volume
-  // total daquele dia — dá pra bater o olho e ver rapidinho onde há buracos
-  // na coleta e como a base de histórico está crescendo.
-  const maxVal = Math.max(1, ...dates.map((d) => totalsByDate[d]));
-  const bars = dates.map((d) => {
-    const val = totalsByDate[d];
-    const hPct = Math.max(4, Math.round((val / maxVal) * 100));
-    const cls = d === today ? "is-today" : val === 0 ? "is-empty" : "";
-    return `<div class="history-chart__bar ${cls}" style="height:${hPct}%" title="${d} — ${val} atendimento${val === 1 ? "" : "s"}"></div>`;
+  const bars = buckets.map((b, i) => {
+    const label = b.label || b.date;
+    const val = Number(b.total) || 0;
+    const height = Math.max(3, Math.round((val / maxVal) * 100));
+    const isToday = b.date === today;
+    const tme = weightedAvgBy(b.rows, "tme_seconds"), tma = weightedAvgBy(b.rows, "tma_seconds"), sl = weightedAvgBy(b.rows, "service_level");
+    const title = `${label} — ${val} atendimentos | TME ${formatSeconds(tme)} | TMA ${formatSeconds(tma)} | NS ${Number(sl || 0).toFixed(1)}%`;
+    return `<div class="history-chart__item" title="${title}"><div class="history-chart__value">${val.toLocaleString("pt-BR")}</div><div class="history-chart__bar-wrap"><div class="history-chart__bar ${isToday ? "is-today" : val === 0 ? "is-empty" : ""}" style="height:${height}%"></div></div><div class="history-chart__label">${label}</div></div>`;
   }).join("");
-  chartEl.innerHTML = `<div class="history-chart__bars">${bars}</div><div class="history-chart__labels"><span>${dates[0]}</span><span>${dates[dates.length - 1]}</span></div>`;
+  const unit = bounds.group === "month" ? "mês" : "dia";
+  el.innerHTML = `<strong>${buckets.length} ${unit}${buckets.length > 1 ? "s" : ""}</strong> exibidos em <strong>${bounds.label}</strong>, de <strong>${bounds.from}</strong> a <strong>${bounds.to}</strong>. Passe o cursor sobre uma barra para ver volume, TME, TMA e nível de serviço.`;
+  chartEl.innerHTML = `<div class="history-chart__bars">${bars}</div><div class="history-chart__meta">Escala: maior barra = ${maxVal.toLocaleString("pt-BR")} atendimentos no período selecionado. Arraste horizontalmente para consultar períodos longos.</div>`;
 }
 
 let reportsLoaded = false;
@@ -2920,7 +2974,31 @@ function renderCompareHeatmap(pivotA, pivotB) {
 
 let lastCompareResult = null;
 
-function renderCompareBars(values) { const wrap=document.getElementById('compareBarsWrap'); if(!wrap)return; const items=[['Volume',values.totalA,values.totalB,''],['TME',values.tmeA,values.tmeB,'s'],['TMA',values.tmaA,values.tmaB,'s'],['Nível de serviço',values.slA,values.slB,'%']]; const max=Math.max(...items.flatMap(x=>[Number(x[1])||0,Number(x[2])||0]),1); wrap.innerHTML='<h3 style="margin:0">Comparação visual — valores A e B</h3>'+items.map(([label,a,b,u])=>{const av=Number(a)||0,bv=Number(b)||0;return `<div class="compare-bar-row"><strong>${label}</strong><div class="compare-bar-track" title="Período A: ${av.toFixed(1)}${u}"><div class="compare-bar-fill a" style="width:${Math.max(2,av/max*100)}%"></div></div><div class="compare-bar-track" title="Período B: ${bv.toFixed(1)}${u}"><div class="compare-bar-fill b" style="width:${Math.max(2,bv/max*100)}%"></div></div><span>A ${av.toFixed(1)}${u} · B ${bv.toFixed(1)}${u}</span></div>`}).join(''); }
+function compareMetricItems(values) { return [["Volume", values.totalA, values.totalB, ""], ["TME", values.tmeA, values.tmeB, "s"], ["TMA", values.tmaA, values.tmaB, "s"], ["Nível de serviço", values.slA, values.slB, "%"]]; }
+function renderCompareBars(values) {
+  const wrap = document.getElementById("compareBarsWrap"); if (!wrap) return;
+  const granularity = document.getElementById("compareGranularity")?.value || "general";
+  if (granularity === "daily" && values.rowsA && values.rowsB) {
+    const daysA = historyDayBuckets(values.rowsA, values.rangeA.from, values.rangeA.to), daysB = historyDayBuckets(values.rowsB, values.rangeB.from, values.rangeB.to);
+    const metric = document.getElementById("compareMetric")?.value || "volume";
+    const metricInfo = { volume:["Volume",""], tme:["TME","s"], tma:["TMA","s"], service_level:["Nível de serviço","%"] }[metric] || ["Volume",""];
+    const len = Math.max(daysA.length, daysB.length), pairs = [];
+    for (let i=0;i<len;i++) { const a=daysA[i], b=daysB[i]; const av=a ? (metric === "volume" ? a.total : weightedAvgBy(a.rows, metric === "service_level" ? "service_level" : metric === "tme" ? "tme_seconds" : "tma_seconds")) : 0; const bv=b ? (metric === "volume" ? b.total : weightedAvgBy(b.rows, metric === "service_level" ? "service_level" : metric === "tme" ? "tme_seconds" : "tma_seconds")) : 0; pairs.push({ label:`Dia ${String(i+1).padStart(2,"0")}`, a:av, b:bv, detail:`A: ${a?.date || "sem dado"} · B: ${b?.date || "sem dado"}` }); }
+    const max = Math.max(1,...pairs.flatMap(x=>[Number(x.a)||0,Number(x.b)||0]));
+    wrap.innerHTML = `<div class="compare-bars-section"><h3>Comparação detalhada — ${metricInfo[0]} dia a dia</h3><p>Os dias são alinhados pela ordem dentro de cada período. Passe o cursor sobre cada grupo para consultar as datas reais.</p><div class="compare-vertical-scroll"><div class="compare-vertical-chart">${pairs.map(x=>`<div class="compare-vertical-group" title="${x.detail}"><div class="compare-vertical-bars"><div class="compare-vertical-bar a" style="height:${Math.max(2,(Number(x.a)||0)/max*100)}%"><span>${formatCompareValue(x.a,metricInfo[1])}</span></div><div class="compare-vertical-bar b" style="height:${Math.max(2,(Number(x.b)||0)/max*100)}%"><span>${formatCompareValue(x.b,metricInfo[1])}</span></div></div><div class="compare-vertical-label">${x.label}</div></div>`).join("")}</div></div><div class="compare-vertical-legend"><strong>A · ${values.rangeA.from} a ${values.rangeA.to}</strong><strong>B · ${values.rangeB.from} a ${values.rangeB.to}</strong></div></div>`;
+    return;
+  }
+  const items = compareMetricItems(values), max = Math.max(1, ...items.flatMap(x=>[Number(x[1])||0,Number(x[2])||0]));
+  wrap.innerHTML = `<div class="compare-bars-section"><h3>Comparação geral — período completo</h3><p>Valores absolutos de cada período, com métricas lado a lado.</p><div class="compare-vertical-scroll"><div class="compare-vertical-chart">${items.map(([label,a,b,u])=>`<div class="compare-vertical-group" title="${label}"><div class="compare-vertical-bars"><div class="compare-vertical-bar a" style="height:${Math.max(2,(Number(a)||0)/max*100)}%"><span>${formatCompareValue(a,u)}</span></div><div class="compare-vertical-bar b" style="height:${Math.max(2,(Number(b)||0)/max*100)}%"><span>${formatCompareValue(b,u)}</span></div></div><div class="compare-vertical-label">${label}</div></div>`).join("")}</div></div><div class="compare-vertical-legend"><strong>A · ${values.rangeA.from} a ${values.rangeA.to}</strong><strong>B · ${values.rangeB.from} a ${values.rangeB.to}</strong></div></div>`;
+}
+function formatCompareValue(value, unit) { const n=Number(value)||0; if(unit === "s") return formatSeconds(n); if(unit === "%") return `${n.toFixed(1)}%`; return n.toLocaleString("pt-BR", { maximumFractionDigits: 1 }); }
+function applyCompareViewMode() {
+  const mode = document.getElementById("compareViewMode")?.value || "all";
+  const summary = document.getElementById("compareSummaryGrid"), bars = document.getElementById("compareBarsWrap"), heat = document.getElementById("compareHeatmapWrap");
+  if (summary) summary.style.display = mode === "bars" || mode === "percent" ? "none" : "";
+  if (bars) bars.style.display = mode === "percent" ? "none" : "";
+  if (heat) heat.style.display = mode === "values" || mode === "bars" ? "none" : "";
+}
 async function runCompare() {
   const rangeA = getCompareRange("A");
   const rangeB = getCompareRange("B");
@@ -2966,9 +3044,9 @@ async function runCompare() {
 
     const { matrix: pivotA } = buildHeatPivot(rowsA);
     const { matrix: pivotB } = buildHeatPivot(rowsB);
-    renderCompareHeatmap(pivotA, pivotB); renderCompareBars({ totalA, totalB, tmeA, tmeB, tmaA, tmaB, slA, slB });
+    renderCompareHeatmap(pivotA, pivotB); renderCompareBars({ totalA, totalB, tmeA, tmeB, tmaA, tmaB, slA, slB, rowsA, rowsB, rangeA, rangeB }); applyCompareViewMode();
 
-    lastCompareResult = { rangeA, rangeB, totalA, totalB, tmeA, tmeB, tmaA, tmaB, slA, slB, pivotA, pivotB, queuesLabel: exportQueuesLabel() };
+    lastCompareResult = { rangeA, rangeB, totalA, totalB, tmeA, tmeB, tmaA, tmaB, slA, slB, pivotA, pivotB, rowsA, rowsB, queuesLabel: exportQueuesLabel() };
 
     document.getElementById("compareResults").style.display = "block";
     statusEl.textContent = `Comparação pronta: ${rangeA.from} a ${rangeA.to} (A) x ${rangeB.from} a ${rangeB.to} (B).`;
@@ -3091,6 +3169,9 @@ function exportComparePdf() {
 document.getElementById("compareRunBtn").addEventListener("click", runCompare);
 document.getElementById("compareExportXlsxBtn").addEventListener("click", exportCompareXlsx);
 document.getElementById("compareExportPdfBtn").addEventListener("click", exportComparePdf);
+document.getElementById("historyRangePreset")?.addEventListener("change", () => renderHistoryRange(lastReportsAll));
+document.getElementById("compareViewMode")?.addEventListener("change", applyCompareViewMode);
+document.getElementById("compareGranularity")?.addEventListener("change", () => { if (lastCompareResult) renderCompareBars({ ...lastCompareResult, rowsA: lastCompareResult.rowsA || [], rowsB: lastCompareResult.rowsB || [] }); });
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
