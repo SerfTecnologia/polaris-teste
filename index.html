@@ -446,7 +446,63 @@
   .compare-vertical-legend strong:last-child { color:#d6741e; }
 </style>
 <style>
-.polaris-auth-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;background:radial-gradient(circle at 20% 20%,#153a45,#07151b 55%,#040a0d);padding:24px}.polaris-auth-card,.polaris-admin-card{width:min(460px,100%);background:#f8fbfc;border:1px solid rgba(255,255,255,.25);border-radius:22px;box-shadow:0 24px 80px #0008;padding:34px;color:#102229}.polaris-auth-mark{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;background:#0b7488;color:#fff;font-weight:800;font-size:25px;overflow:hidden}.polaris-auth-mark img{width:100%;height:100%;object-fit:cover}.polaris-auth-kicker{font-size:11px;letter-spacing:.16em;font-weight:800;color:#0b7488;margin:22px 0 8px}.polaris-auth-card h1,.polaris-admin-card h2{margin:0 0 10px}.polaris-auth-copy{color:#5a6b70;line-height:1.55}.polaris-auth-form,.polaris-admin-form{display:grid;gap:12px;margin-top:22px}.polaris-auth-form label{display:grid;gap:6px;font-size:13px;font-weight:700}.polaris-auth-form input,.polaris-admin-form input,.polaris-admin-form select{border:1px solid #cbd8dc;border-radius:10px;padding:12px;background:#fff;font:inherit}.polaris-auth-submit,.polaris-auth-secondary{border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}.polaris-auth-submit{background:#0b7488;color:#fff}.polaris-auth-secondary{background:#e6f1f3;color:#0b5a69}.polaris-auth-link{border:0;background:none;color:#0b7488;cursor:pointer;text-decoration:underline}.polaris-auth-message{min-height:20px;font-size:13px;color:#a3342a}.polaris-auth-form[hidden]{display:none!important}.tv-mode-btn svg{width:19px;height:19px}.tv-settings-card{border:1px solid rgba(11,116,136,.18)}body.tv-mode .header__right,body.tv-mode #reportsToggleBtn,body.tv-mode #monitorToggleBtn,body.tv-mode #panelToggleBtn,body.tv-mode #polaris-admin-open{display:none!important}body.tv-mode .header{justify-content:space-between}body.tv-mode .header__brand{display:flex!important;align-items:center}body.tv-mode #panel-config,body.tv-mode #panel-reports,body.tv-mode #panel-monitor{display:none!important}body.tv-mode #panel-painel{display:block!important;max-width:1600px;margin:0 auto}body.tv-mode .app{padding:0}.compare-bars-wrap{display:grid;gap:12px}.compare-bar-row{display:grid;grid-template-columns:180px 1fr 1fr 120px;gap:10px;align-items:center;font-size:12px}.compare-bar-track{height:18px;background:#e7eff1;border-radius:99px;overflow:hidden}.compare-bar-fill{height:100%;border-radius:99px}.compare-bar-fill.a{background:#0b7488}.compare-bar-fill.b{background:#ed8b3a}@media(max-width:700px){.compare-bar-row{grid-template-columns:1fr}}.polaris-admin-modal[hidden]{display:none!important}.polaris-auth-gate[hidden]{display:none!important}.polaris-admin-modal{position:fixed;inset:0;z-index:9999;background:#07151bcc;display:grid;place-items:center;padding:24px}.polaris-admin-card{width:min(980px,100%);max-height:90vh;overflow:auto}.polaris-admin-head{display:flex;justify-content:space-between;align-items:start}.polaris-admin-tabs{display:flex;gap:8px;border-bottom:1px solid #d9e2e5;margin:22px 0;padding-bottom:8px}.polaris-admin-tabs button{border:0;background:none;padding:8px 12px;cursor:pointer}.polaris-admin-tabs button.is-active{color:#0b7488;border-bottom:2px solid #0b7488;font-weight:800}.polaris-admin-form{grid-template-columns:repeat(4,1fr)}.polaris-admin-form button{border:0;border-radius:10px;background:#0b7488;color:#fff;font-weight:800}.polaris-admin-row{display:grid;grid-template-columns:1.5fr 1fr 120px 100px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #e5edef}.polaris-admin-row button{border:1px solid #b9c9ce;background:#fff;border-radius:8px;padding:7px;cursor:pointer}@media(max-width:700px){.polaris-admin-form{grid-template-columns:1fr}.polaris-admin-row{grid-template-columns:1fr}}
+.polaris-auth-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;background:radial-gradient(circle at 20% 20%,#153a45,#07151b 55%,#040a0d);padding:24px}.polaris-auth-card,.polaris-admin-card{width:min(460px,100%);background:#f8fbfc;border:1px solid rgba(255,255,255,.25);border-radius:22px;box-shadow:0 24px 80px #0008;padding:34px;color:#102229}.polaris-auth-mark{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;background:#0b7488;color:#fff;font-weight:800;font-size:25px;overflow:hidden}.polaris-auth-mark img{width:100%;height:100%;object-fit:cover}.polaris-auth-kicker{font-size:11px;letter-spacing:.16em;font-weight:800;color:#0b7488;margin:22px 0 8px}.polaris-auth-card h1,.polaris-admin-card h2{margin:0 0 10px}.polaris-auth-copy{color:#5a6b70;line-height:1.55}.polaris-auth-form,.polaris-admin-form{display:grid;gap:12px;margin-top:22px}.polaris-auth-form label{display:grid;gap:6px;font-size:13px;font-weight:700}.polaris-auth-form input,.polaris-admin-form input,.polaris-admin-form select{border:1px solid #cbd8dc;border-radius:10px;padding:12px;background:#fff;font:inherit}.polaris-auth-submit,.polaris-auth-secondary{border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}.polaris-auth-submit{background:#0b7488;color:#fff}.polaris-auth-secondary{background:#e6f1f3;color:#0b5a69}.polaris-auth-link{border:0;background:none;color:#0b7488;cursor:pointer;text-decoration:underline}.polaris-auth-message{min-height:20px;font-size:13px;color:#a3342a}.polaris-auth-form[hidden]{display:none!important}.tv-mode-btn svg{width:19px;height:19px}.tv-settings-card{border:1px solid rgba(11,116,136,.18)}body.tv-mode .header__right,body.tv-mode #reportsToggleBtn,body.tv-mode #monitorToggleBtn,body.tv-mode #panelToggleBtn,body.tv-mode #polaris-admin-open{display:none!important}body.tv-mode .header{justify-content:space-between}body.tv-mode .header__brand{display:flex!important;align-items:center}body.tv-mode #panel-config,body.tv-mode #panel-reports,body.tv-mode #panel-monitor{display:none!important}body.tv-mode #panel-painel{display:block!important;max-width:1600px;margin:0 auto}body.tv-mode .app{padding:0}
+/* Modo TV: composição fluida para monitores, TVs e resoluções ultrawide */
+body.tv-mode { overflow: hidden; }
+body.tv-mode .page {
+  box-sizing: border-box; width: 100vw; min-width: 0; height: 100dvh; max-width: none; margin: 0;
+  padding: clamp(10px, 1.2vw, 24px);
+  gap: clamp(8px, 1vw, 18px); align-items: stretch;
+}
+body.tv-mode .app { width: 100%; max-width: none; min-width: 0; margin: 0; }
+body.tv-mode #panel-painel,
+body.tv-mode #panel-painel .grid-top,
+body.tv-mode #panel-painel .stat-grid,
+body.tv-mode #panel-painel .hero-col { min-width: 0; }
+body.tv-mode .header {
+  width: 100%; min-height: clamp(64px, 8vh, 108px); max-height: none;
+  padding: clamp(10px, 1.25vw, 22px) clamp(14px, 2vw, 34px);
+  border-radius: clamp(12px, 1.2vw, 22px);
+}
+body.tv-mode .header__brand { min-width: 0; }
+body.tv-mode .header h1 { font-size: clamp(22px, 2.35vw, 44px); }
+body.tv-mode .header__subtitle { font-size: clamp(11px, 1.05vw, 18px); }
+body.tv-mode .header__mark { width: clamp(38px, 3.2vw, 58px); height: clamp(38px, 3.2vw, 58px); }
+body.tv-mode #panel-painel {
+  display: flex !important; flex: 1 1 auto; width: 100%; max-width: none; min-height: 0;
+  overflow: hidden; margin: 0; align-self: stretch;
+}
+body.tv-mode #panel-painel .grid-top {
+  width: 100%; flex: 1 1 auto; min-height: 0;
+  grid-template-columns: minmax(220px, .78fr) minmax(0, 2.22fr);
+  gap: clamp(10px, 1.2vw, 22px);
+}
+body.tv-mode #panel-painel .hero-col,
+body.tv-mode #panel-painel .stat-grid { min-height: 0; }
+body.tv-mode #panel-painel .stat-grid { gap: clamp(8px, 1vw, 18px); }
+body.tv-mode #panel-painel .waiting-card__value { font-size: clamp(52px, 7vw, 120px); }
+body.tv-mode #panel-painel .mood-card__title { font-size: clamp(20px, 2.1vw, 38px); }
+body.tv-mode #panel-painel .mood-card__message { font-size: clamp(12px, 1.1vw, 20px); }
+body.tv-mode #panel-painel .stat__label { font-size: clamp(12px, 1.05vw, 20px); }
+body.tv-mode #panel-painel .stat__sublabel { font-size: clamp(10px, .82vw, 16px); }
+body.tv-mode #panel-painel .stat__value { font-size: clamp(32px, 4.5vw, 82px); }
+body.tv-mode #panel-painel .stat__value-secondary { font-size: clamp(14px, 1.35vw, 25px); }
+body.tv-mode #panel-painel .target-bar,
+body.tv-mode #panel-painel .topics-card { flex: 0 0 auto; }
+body.tv-mode #panel-painel .topics-card { max-height: 24vh; overflow: auto; }
+body.tv-mode #panel-painel .topic-pill__count { font-size: clamp(22px, 2.4vw, 42px); }
+@media (max-aspect-ratio: 4/3) {
+  body.tv-mode #panel-painel { overflow-y: auto; }
+  body.tv-mode #panel-painel .grid-top { grid-template-columns: 1fr; grid-template-rows: auto auto; }
+  body.tv-mode #panel-painel .hero-col { display: grid; grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 760px) {
+  body.tv-mode .page { padding: 8px; }
+  body.tv-mode #panel-painel .grid-top { grid-template-columns: 1fr; }
+  body.tv-mode #panel-painel .hero-col { grid-template-columns: 1fr; }
+  body.tv-mode #panel-painel .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; }
+}
+.compare-bars-wrap{display:grid;gap:12px}.compare-bar-row{display:grid;grid-template-columns:180px 1fr 1fr 120px;gap:10px;align-items:center;font-size:12px}.compare-bar-track{height:18px;background:#e7eff1;border-radius:99px;overflow:hidden}.compare-bar-fill{height:100%;border-radius:99px}.compare-bar-fill.a{background:#0b7488}.compare-bar-fill.b{background:#ed8b3a}@media(max-width:700px){.compare-bar-row{grid-template-columns:1fr}}.polaris-admin-modal[hidden]{display:none!important}.polaris-auth-gate[hidden]{display:none!important}.polaris-admin-modal{position:fixed;inset:0;z-index:9999;background:#07151bcc;display:grid;place-items:center;padding:24px}.polaris-admin-card{width:min(980px,100%);max-height:90vh;overflow:auto}.polaris-admin-head{display:flex;justify-content:space-between;align-items:start}.polaris-admin-tabs{display:flex;gap:8px;border-bottom:1px solid #d9e2e5;margin:22px 0;padding-bottom:8px}.polaris-admin-tabs button{border:0;background:none;padding:8px 12px;cursor:pointer}.polaris-admin-tabs button.is-active{color:#0b7488;border-bottom:2px solid #0b7488;font-weight:800}.polaris-admin-form{grid-template-columns:repeat(4,1fr)}.polaris-admin-form button{border:0;border-radius:10px;background:#0b7488;color:#fff;font-weight:800}.polaris-admin-row{display:grid;grid-template-columns:1.5fr 1fr 120px 100px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #e5edef}.polaris-admin-row button{border:1px solid #b9c9ce;background:#fff;border-radius:8px;padding:7px;cursor:pointer}@media(max-width:700px){.polaris-admin-form{grid-template-columns:1fr}.polaris-admin-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -475,9 +531,9 @@
 <div id="polaris-account-modal" class="polaris-admin-modal" hidden><div class="polaris-admin-card" style="max-width:460px"><div class="polaris-admin-head"><div><p class="polaris-auth-kicker">MINHA CONTA</p><h2>Alterar minha senha</h2></div><button type="button" id="polaris-account-close" class="btn btn--ghost">Fechar</button></div><p class="card__note">Você pode alterar somente a sua própria senha.</p><form id="polaris-account-form" class="polaris-auth-form"><label>Nova senha<input id="polaris-account-password" type="password" minlength="8" required autocomplete="new-password"></label><label>Confirme a nova senha<input id="polaris-account-password-confirm" type="password" minlength="8" required autocomplete="new-password"></label><button type="submit" class="btn btn--primary">Salvar nova senha</button><p id="polaris-account-message" class="polaris-auth-message" role="status"></p></form></div></div><div id="polaris-admin-modal" class="polaris-admin-modal" hidden>
   <div class="polaris-admin-card">
     <div class="polaris-admin-head"><div><p class="polaris-auth-kicker">ADMINISTRAÇÃO</p><h2>Usuários e permissões</h2></div><button id="polaris-admin-close" class="polaris-auth-link">Fechar</button></div>
-    <div class="polaris-admin-tabs"><button data-admin-tab="users" class="is-active">Usuários</button><button data-admin-tab="roles">Perfis e telas</button></div>
+    <div class="polaris-admin-tabs"><button data-admin-tab="users" class="is-active">Usuários</button><button data-admin-tab="roles">Perfis e telas</button><button data-admin-tab="learning">Aprendizado</button></div>
     <section id="polaris-admin-users"><form id="polaris-user-form" class="polaris-admin-form"><input id="admin-user-email" type="email" required placeholder="e-mail @linx.com.br ou @totvs.com.br"/><input id="admin-user-name" required placeholder="Nome completo"/><input id="admin-user-password" type="password" minlength="8" placeholder="Senha prévia (opcional)" autocomplete="new-password"/><select id="admin-user-role"><option value="user">Usuário</option><option value="admin">Administrador</option></select><button class="polaris-auth-submit">Criar acesso</button></form><p style="font-size:12px;color:#5a6b70;margin-top:8px">Com senha prévia, o usuário entra imediatamente. Sem senha, ele recebe um convite para definir a própria senha.</p><div id="polaris-users-list"></div></section>
-    <section id="polaris-admin-roles" hidden><form id="polaris-role-form" class="polaris-admin-form"><input id="admin-role-name" required placeholder="Nome do perfil"/><input id="admin-role-label" required placeholder="Rótulo do perfil"/><button class="polaris-auth-submit">Criar perfil</button></form><div id="polaris-roles-list"></div></section>
+    <section id="polaris-admin-roles" hidden><form id="polaris-role-form" class="polaris-admin-form"><input id="admin-role-name" required placeholder="Nome do perfil"/><input id="admin-role-label" required placeholder="Rótulo do perfil"/><button class="polaris-auth-submit">Criar perfil</button></form><div id="polaris-roles-list"></div></section><section id="polaris-admin-learning" hidden><p class="card__note">Aqui aparecem apenas agrupamentos recorrentes ainda não classificados. O texto fica restrito ao master; nada é aplicado até você revisar e aprovar.</p><div id="polaris-learning-list"><p>Abra esta aba para carregar candidatos.</p></div></section>
     <p id="polaris-admin-message" class="polaris-auth-message"></p>
   </div>
 </div>
@@ -622,12 +678,12 @@
 
     <section class="agent-section" id="agentSection">
       <div class="agent-section__head">
-        <h2>Analistas acima do tempo limite</h2>
-        <p class="agent-section__hint">Fonte: Painel RC — vertical Food</p>
+        <h2>Atendimentos por categoria</h2>
+        <p class="agent-section__hint">Resumo operacional por categoria; nomes, filas e assuntos completos ficam somente na visão detalhada.</p>
       </div>
       <div class="table-wrap">
         <table class="agent-table">
-          <thead><tr><th>Analista</th><th>Cliente</th><th id="agentAssuntoHeader">Assunto</th><th>Fila</th><th>Tempo</th></tr></thead>
+          <thead><tr><th>Categoria</th><th>Em fila</th><th>Em atendimento</th><th>Total</th></tr></thead>
           <tbody id="agentTableBody">
             <tr><td colspan="5"><div class="empty-state"><span>Carregando…</span></div></td></tr>
           </tbody>
@@ -768,8 +824,10 @@
       <div class="card tv-settings-card">
         <div class="card__title"><span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span><h2>Modo TV</h2></div>
         <p class="card__note">A TV usa uma configuração independente da sua tela principal. Salvar aqui não altera suas metas ou preferências pessoais.</p>
+        <div class="field field--switch"><label>Exibir indicador de volume na TV</label><label class="switch"><input type="checkbox" id="tvVolumeIndicatorEnabled" checked /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
+        <div class="field field--switch"><label>Exibir assuntos semelhantes por categoria</label><label class="switch"><input type="checkbox" id="tvSimilarIssuesEnabled" checked /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
         <div class="field field--switch"><label>Exibir analistas acima do TMA na TV</label><label class="switch"><input type="checkbox" id="tvAgentTmaTableEnabled" /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
-        <div class="field field--switch"><label>Exibir assunto e link na tabela da TV</label><label class="switch"><input type="checkbox" id="tvAgentShowSubjectLink" /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
+        <div class="field field--switch"><label>Exibir assunto e link na visão detalhada da TV</label><label class="switch"><input type="checkbox" id="tvAgentShowSubjectLink" /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
         <div class="actions"><button type="button" id="saveTvSettingsBtn" class="btn btn--ghost">Salvar configuração da TV</button></div>
         <p id="tvSavedMsg" class="saved-msg" style="display:none">Configuração da TV salva.</p>
       </div>
@@ -1075,6 +1133,8 @@ const DEFAULT_SETTINGS = {
   similarIssuesEnabled: false,
   agentTmaTableEnabled: true,
   agentShowSubjectLink: true,
+  tvVolumeIndicatorEnabled: true,
+  tvSimilarIssuesEnabled: true,
 };
 
 const LS_KEY = "orionWebSettings";
@@ -1412,8 +1472,8 @@ function applyAgentSubjectColumnVisibility(settings) {
 
 let currentSettings = loadSettings();
 
-function fillTvForm(s) { document.getElementById("tvAgentTmaTableEnabled").checked = !!s.agentTmaTableEnabled; document.getElementById("tvAgentShowSubjectLink").checked = !!s.agentShowSubjectLink; }
-function getTvSettings() { return { ...tvSettings, agentTmaTableEnabled: document.getElementById("tvAgentTmaTableEnabled").checked, agentShowSubjectLink: document.getElementById("tvAgentShowSubjectLink").checked }; }
+function fillTvForm(s) { document.getElementById("tvVolumeIndicatorEnabled").checked = s.tvVolumeIndicatorEnabled !== false; document.getElementById("tvSimilarIssuesEnabled").checked = s.tvSimilarIssuesEnabled !== false; document.getElementById("tvAgentTmaTableEnabled").checked = !!s.agentTmaTableEnabled; document.getElementById("tvAgentShowSubjectLink").checked = !!s.agentShowSubjectLink; }
+function getTvSettings() { return { ...tvSettings, tvVolumeIndicatorEnabled: document.getElementById("tvVolumeIndicatorEnabled").checked, tvSimilarIssuesEnabled: document.getElementById("tvSimilarIssuesEnabled").checked, agentTmaTableEnabled: document.getElementById("tvAgentTmaTableEnabled").checked, agentShowSubjectLink: document.getElementById("tvAgentShowSubjectLink").checked }; }
 function fillForm(s) {
   f.queueFirstAlertSeconds.value = s.queueFirstAlertSeconds;
   f.queueReminderMinutes.value = s.queueReminderMinutes;
@@ -1478,18 +1538,28 @@ document.getElementById("selectNoneQueues").addEventListener("click", () => {
 
 // ===================== Chamadas aos proxies Supabase =====================
 async function callSupabaseFunction(name, options = {}) {
-  const res = await fetch(`${SUPABASE_FUNCTIONS_BASE}/${name}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "apikey": SUPABASE_PUBLISHABLE_KEY,
-      "Authorization": `Bearer ${window.polarisAccessToken || SUPABASE_PUBLISHABLE_KEY}`,
-      ...(options.headers || {}),
-    },
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
-  return data;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const res = await fetch(`${SUPABASE_FUNCTIONS_BASE}/${name}`, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": `Bearer ${window.polarisAccessToken || SUPABASE_PUBLISHABLE_KEY}`,
+        ...(options.headers || {}),
+      },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) throw new Error(data.error || `HTTP ${res.status}`);
+    return data;
+  } catch (err) {
+    if (err?.name === "AbortError") throw new Error(`Tempo esgotado ao consultar ${name}.`);
+    throw err;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function formatSeconds(s) {
@@ -1723,9 +1793,24 @@ function countWordOverlap(kwWords, textWordsArr) {
   return kwWords.filter((kw) => textWordsArr.some((tw) => wordsMatch(kw, tw))).length;
 }
 
+let learnedSubjectRules = [];
+let learnedRulesLoaded = false;
+async function loadLearnedSubjectRules() {
+  if (learnedRulesLoaded || !window.sb) return;
+  learnedRulesLoaded = true;
+  try {
+    const { data } = await window.sb.from("polaris_subject_rules").select("category_key,category_label,keywords,phrases").eq("is_active", true).limit(100);
+    learnedSubjectRules = Array.isArray(data) ? data : [];
+    learnedSubjectRules.forEach((r) => { SUBJECT_CATEGORY_LABEL[r.category_key] = r.category_label; });
+  } catch (error) { console.warn("[Polaris] Regras aprendidas indisponíveis:", error); }
+}
 function categorizeSubject(text) {
   const norm = normalizeSubjectText(text);
   if (!norm) return null;
+  for (const rule of learnedSubjectRules) {
+    const terms = [...(rule.keywords || []), ...(rule.phrases || [])].map(normalizeSubjectText).filter(Boolean);
+    if (terms.some((term) => norm.includes(term))) return rule.category_key;
+  }
 
   // 1) Substring direto — cobre a maioria dos casos reais
   for (const cat of SUBJECT_CATEGORIES) {
@@ -1772,6 +1857,26 @@ function extractWaitingSubjects(filaRows) {
   return filaRows.map((r) => r.Assunto).filter(Boolean);
 }
 
+let lastSubjectCandidateSyncAt = 0;
+async function submitSubjectCandidates(filaRows) {
+  if (!window.sb || !polarisUserId || !Array.isArray(filaRows)) return;
+  if (Date.now() - lastSubjectCandidateSyncAt < 5 * 60 * 1000) return;
+  lastSubjectCandidateSyncAt = Date.now();
+  const unknown = filaRows.map((r) => String(r.Assunto || "").trim()).filter((subject) => subject && categorizeSubject(subject) === "outros");
+  const clusters = new Map();
+  unknown.forEach((subject) => {
+    const norm = normalizeSubjectText(subject);
+    const words = significantWords(norm).slice(0, 8);
+    if (!words.length) return;
+    const fingerprint = words.sort().join("-").slice(0, 180);
+    const current = clusters.get(fingerprint) || { fingerprint, sample_subject: subject, occurrences: 0 };
+    current.occurrences += 1; clusters.set(fingerprint, current);
+  });
+  for (const candidate of [...clusters.values()].slice(0, 12)) {
+    await window.sb.from("polaris_subject_candidates").upsert({ ...candidate, last_seen_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: "fingerprint" });
+  }
+}
+
 const TOPICS_VISIBLE_LIMIT = 6; // pills visíveis antes de precisar expandir — otimizado pra não quebrar o layout da TV
 let topicsExpanded = false;
 
@@ -1780,12 +1885,14 @@ function renderTopicsCard(filaRows, settings) {
   const grid = document.getElementById("topicsGrid");
   const hint = document.getElementById("topicsHint");
 
-  if (!settings.similarIssuesEnabled) {
+  const topicsEnabled = document.body.classList.contains("tv-mode") ? settings.tvSimilarIssuesEnabled !== false : settings.similarIssuesEnabled;
+  if (!topicsEnabled) {
     card.style.display = "none";
     return;
   }
 
   const subjects = extractWaitingSubjects(filaRows);
+  submitSubjectCandidates(filaRows).catch(() => {});
 
   if (!subjects || subjects.length === 0) {
     // Ninguém em fila com assunto agora: o card some por completo (não
@@ -1847,8 +1954,11 @@ function tempoCellClass(level) {
 // assim os três usam a mesma busca por ciclo, sem chamadas repetidas.
 let latestPanelData = null;
 
+let panelRefreshInFlight = false;
 async function refreshPanel() {
-  const settings = loadSettings();
+  if (document.hidden || panelRefreshInFlight) return;
+  panelRefreshInFlight = true;
+  const settings = loadSettings(document.body.classList.contains("tv-mode") ? "tv" : "personal");
   const skills = getActiveSkills(settings);
   const errorBanner = document.getElementById("errorBanner");
   const connStatus = document.getElementById("connStatus");
@@ -1911,7 +2021,12 @@ async function refreshPanel() {
   // a tela de monitoramento completo) — evita 3 chamadas repetidas.
   const agentTableBody = document.getElementById("agentTableBody");
   const agentError = document.getElementById("agentError");
+  const targetBar = document.querySelector(".target-bar");
+  if (targetBar) targetBar.style.display = document.body.classList.contains("tv-mode") && settings.tvVolumeIndicatorEnabled === false ? "none" : "";
+  const topicsCard = document.getElementById("topicsCard");
+  if (topicsCard && document.body.classList.contains("tv-mode") && settings.tvSimilarIssuesEnabled === false) topicsCard.style.display = "none";
   applyAgentSectionVisibility(settings);
+  if (document.body.classList.contains("tv-mode")) document.getElementById("agentSection").style.display = "none";
   applyAgentSubjectColumnVisibility(settings);
   const colCount = settings.agentShowSubjectLink ? 5 : 4;
 
@@ -1923,58 +2038,31 @@ async function refreshPanel() {
     renderTopicsCard(panel.fila?.rows, settings);
     if (isPanelActive("monitor")) renderMonitorScreen(panel, settings);
 
-    if (!settings.agentTmaTableEnabled) return;
-
+    if (!settings.agentTmaTableEnabled || document.body.classList.contains("tv-mode")) { panelRefreshInFlight = false; return; }
     const selectedSet = Array.isArray(settings.selectedQueues) && settings.selectedQueues.length > 0
       ? new Set(settings.selectedQueues.map((s) => s.toLowerCase())) : null;
-
-    const rows = (panel.andamento?.rows || [])
-      .filter((r) => !selectedSet || selectedSet.has((r.__filaBase || r.Fila || "").toLowerCase()))
-      .map((r) => ({ ...r, __level: classifyAgentTma(r.__tempoSegundos, settings) }))
-      .filter((r) => r.__level !== "ok")
-      .sort((a, b) => (b.__tempoSegundos || 0) - (a.__tempoSegundos || 0));
-
+    const queueRows = (panel.fila?.rows || []).filter((r) => !selectedSet || selectedSet.has((r.__filaBase || r.Fila || "").toLowerCase()));
+    const attendanceRows = (panel.andamento?.rows || []).filter((r) => !selectedSet || selectedSet.has((r.__filaBase || r.Fila || "").toLowerCase()));
+    const groups = new Map();
+    const addGroup = (row, kind) => {
+      const key = categorizeSubject(row.Assunto) || "outros";
+      const item = groups.get(key) || { key, queue: 0, attendance: 0 };
+      item[kind] += 1; groups.set(key, item);
+    };
+    queueRows.forEach((r) => addGroup(r, "queue"));
+    attendanceRows.forEach((r) => addGroup(r, "attendance"));
+    const rows = [...groups.values()].sort((a, b) => (b.queue + b.attendance) - (a.queue + a.attendance));
     agentTableBody.innerHTML = "";
     if (rows.length === 0) {
       const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.colSpan = colCount;
-      td.innerHTML = `<div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <strong>Nenhum analista acima do tempo limite</strong>
-        <span>Atendimento dentro do esperado no momento.</span>
-      </div>`;
-      tr.appendChild(td);
-      agentTableBody.appendChild(tr);
+      const td = document.createElement("td"); td.colSpan = 4;
+      td.innerHTML = '<div class="empty-state"><strong>Nenhum atendimento categorizado no momento</strong><span>A visão completa está disponível em Fila & Atendimento.</span></div>';
+      tr.appendChild(td); agentTableBody.appendChild(tr);
     } else {
       rows.forEach((r) => {
         const tr = document.createElement("tr");
-        // "Link" é a coluna dedicada do Painel RC com o link do chat.
-        // Cliente__href/Analista__href ficam como fallback, caso a
-        // estrutura da fonte mude e o link volte a vir embutido numa
-        // dessas colunas em vez de numa coluna própria.
-        const href = r.Link__href || r.Cliente__href || r.Analista__href;
-        const analistaTd = document.createElement("td");
-        if (href) {
-          const a = document.createElement("a");
-          a.href = href; a.target = "_blank"; a.rel = "noopener"; a.textContent = r.Analista || "–";
-          analistaTd.appendChild(a);
-        } else {
-          analistaTd.textContent = r.Analista || "–";
-        }
-        const clienteTd = document.createElement("td"); clienteTd.textContent = r.Cliente || "–";
-        const filaTd = document.createElement("td"); filaTd.textContent = r.Fila || "–";
-        const tempoTd = document.createElement("td"); tempoTd.textContent = r.Tempo || "–"; tempoTd.className = tempoCellClass(r.__level);
-
-        if (settings.agentShowSubjectLink) {
-          const assuntoTd = document.createElement("td");
-          assuntoTd.className = "agent-table__assunto";
-          assuntoTd.textContent = r.Assunto || "–";
-          assuntoTd.title = r.Assunto || "";
-          tr.append(analistaTd, clienteTd, assuntoTd, filaTd, tempoTd);
-        } else {
-          tr.append(analistaTd, clienteTd, filaTd, tempoTd);
-        }
+        const total = r.queue + r.attendance;
+        tr.innerHTML = `<td><span class="category-badge">${escapeHtml(SUBJECT_CATEGORY_LABEL[r.key] || r.key)}</span></td><td>${r.queue}</td><td>${r.attendance}</td><td><strong>${total}</strong></td>`;
         agentTableBody.appendChild(tr);
       });
     }
@@ -1982,6 +2070,8 @@ async function refreshPanel() {
     agentError.style.display = "flex";
     agentError.textContent = `Falha ao buscar dados do Painel RC via proxy (${err.message}).`;
     agentTableBody.innerHTML = `<tr><td colspan="${colCount}"><div class="empty-state"><span>Sem dados.</span></div></td></tr>`;
+  } finally {
+    panelRefreshInFlight = false;
   }
 }
 
@@ -1989,8 +2079,9 @@ window.polarisStartPanel = () => {
   if (window.polarisPanelStarted) return;
   window.polarisPanelStarted = true;
   refreshPanel();
-  setInterval(refreshPanel, 20000);
+  setInterval(refreshPanel, 30000);
 };
+// A aba oculta não faz polling: evita consumir a origem quando o usuário não está vendo o painel.
 // Mantém a aba de Inteligência viva enquanto estiver aberta, sem precisar
 // reabrir a aba ou clicar em "Atualizar" — a cada 5 min ela busca de novo o
 // histórico (mesmo intervalo da coleta), o que também é o que faz a hora
@@ -3293,7 +3384,27 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
     document.querySelectorAll('[data-admin-tab]').forEach((x) => x.classList.toggle('is-active', x === tab));
     document.getElementById('polaris-admin-users').hidden = tab.dataset.adminTab !== 'users';
     document.getElementById('polaris-admin-roles').hidden = tab.dataset.adminTab !== 'roles';
+    document.getElementById('polaris-admin-learning').hidden = tab.dataset.adminTab !== 'learning';
+    if (tab.dataset.adminTab === 'learning') loadLearningCandidates();
   }));
+  async function loadLearningCandidates() {
+    const list = document.getElementById('polaris-learning-list'); list.textContent = 'Carregando…';
+    const { data, error } = await sb.from('polaris_subject_candidates').select('id,sample_subject,occurrences,category_key,first_seen_at,last_seen_at').eq('status', 'pending').order('occurrences', { ascending: false }).limit(50);
+    if (error) return list.textContent = 'Não foi possível carregar os candidatos.';
+    list.innerHTML = (data || []).map((c) => `<div class="polaris-admin-row" style="grid-template-columns:1.6fr 90px 1fr 110px"><span><strong>${esc(c.sample_subject)}</strong><br><small>Visto ${esc(new Date(c.last_seen_at).toLocaleString('pt-BR'))}</small></span><span>${c.occurrences} ocorrência(s)</span><input data-learning-category="${esc(c.id)}" placeholder="categoria" aria-label="Categoria para ${esc(c.sample_subject)}"/><button type="button" data-learning-approve="${esc(c.id)}">Aprovar</button></div>`).join('') || '<p>Nenhum candidato pendente no momento.</p>';
+    list.querySelectorAll('[data-learning-approve]').forEach((btn) => btn.addEventListener('click', async () => {
+      const id = btn.dataset.learningApprove; const input = list.querySelector(`[data-learning-category="${id}"]`); const label = input.value.trim();
+      if (!label) return setAdminMessage('Informe a categoria antes de aprovar.');
+      const key = label.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 60);
+      const candidate = (data || []).find((x) => x.id === id); if (!candidate) return;
+      const terms = significantWords(normalizeSubjectText(candidate.sample_subject));
+      const ruleResult = await sb.from('polaris_subject_rules').insert({ category_key: key, category_label: label, keywords: terms, phrases: [candidate.sample_subject], created_by: polarisUserId });
+      if (ruleResult.error) return setAdminMessage('Não foi possível salvar a regra.');
+      const updateResult = await sb.from('polaris_subject_candidates').update({ status: 'approved', suggested_category_key: key, reviewed_by: polarisUserId, reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', id);
+      setAdminMessage(updateResult.error ? 'Regra criada, mas o candidato não foi encerrado.' : 'Regra aprovada e aplicada.', !updateResult.error);
+      learnedRulesLoaded = false; await loadLearnedSubjectRules(); loadLearningCandidates();
+    }));
+  }
 
   async function loadUsers() {
     const list = document.getElementById('polaris-users-list'); list.textContent = 'Carregando…';
@@ -3335,6 +3446,7 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
   });
   document.getElementById('polaris-role-form').addEventListener('submit', async (event) => { event.preventDefault(); const name = document.getElementById('admin-role-name').value.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_'); const label = document.getElementById('admin-role-label').value.trim(); const { error } = await sb.from('app_roles').insert({ name, label, description: '', is_system: false }); setAdminMessage(error ? 'Não foi possível criar o perfil.' : 'Perfil criado.', !error); if (!error) { event.target.reset(); loadRoles(); } });
 
+  loadLearnedSubjectRules();
   sb.auth.getSession().then(async ({ data }) => { if (!data.session) return; if (passwordFlow) return showPasswordSetup(); try { await enter(data.session); } catch { await sb.auth.signOut(); } });
   sb.auth.onAuthStateChange((_event, session) => { if (session && passwordFlow && (_event === 'SIGNED_IN' || _event === 'PASSWORD_RECOVERY')) return showPasswordSetup(); if (!session) { window.polarisAccessToken = null; gate.style.display = 'grid'; } });
 })();
