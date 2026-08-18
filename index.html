@@ -1376,6 +1376,7 @@ function applyAgentSectionVisibility(settings) {
 function applyAgentSubjectColumnVisibility(settings) {
   const header = document.getElementById("agentAssuntoHeader");
   if (header) header.style.display = settings.agentShowSubjectLink ? "" : "none";
+  document.querySelectorAll("#agentTableBody td.agent-assunto-cell").forEach((cell) => { cell.style.display = settings.agentShowSubjectLink ? "" : "none"; });
 }
 
 let currentSettings = loadSettings();
