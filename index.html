@@ -1858,10 +1858,9 @@ function extractWaitingSubjects(filaRows) {
 }
 
 let lastSubjectCandidateSyncAt = 0;
+let lastSubjectCandidateSyncSignature = "";
 async function submitSubjectCandidates(filaRows) {
   if (!window.sb || !polarisUserId || !Array.isArray(filaRows)) return;
-  if (Date.now() - lastSubjectCandidateSyncAt < 5 * 60 * 1000) return;
-  lastSubjectCandidateSyncAt = Date.now();
   const unknown = filaRows.map((r) => String(r.Assunto || "").trim()).filter((subject) => subject && categorizeSubject(subject) === "outros");
   const clusters = new Map();
   unknown.forEach((subject) => {
@@ -1872,7 +1871,15 @@ async function submitSubjectCandidates(filaRows) {
     const current = clusters.get(fingerprint) || { fingerprint, sample_subject: subject, occurrences: 0 };
     current.occurrences += 1; clusters.set(fingerprint, current);
   });
-  for (const candidate of [...clusters.values()].slice(0, 12)) {
+  const candidates = [...clusters.values()].slice(0, 6);
+  if (!candidates.length) return;
+  // Não grava a cada polling: a assinatura usa blocos de cinco ocorrências,
+  // evitando writes duplicados quando a fila permanece estável.
+  const signature = candidates.map((c) => `${c.fingerprint}:${Math.floor(c.occurrences / 5)}`).join("|");
+  if (Date.now() - lastSubjectCandidateSyncAt < 15 * 60 * 1000 || signature === lastSubjectCandidateSyncSignature) return;
+  lastSubjectCandidateSyncAt = Date.now();
+  lastSubjectCandidateSyncSignature = signature;
+  for (const candidate of candidates) {
     await window.sb.from("polaris_subject_candidates").upsert({ ...candidate, last_seen_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: "fingerprint" });
   }
 }
