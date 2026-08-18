@@ -744,7 +744,7 @@
         <button type="submit" class="btn btn--primary">Salvar configurações</button>
         <button type="button" id="resetBtn" class="btn btn--ghost">Restaurar padrão</button>
       </div>
-      <p id="savedMsg" class="saved-msg" style="display:none">Configurações salvas neste navegador.</p>
+      <p id="savedMsg" class="saved-msg" style="display:none">Configurações salvas neste navegador.</p><div class="actions" style="margin-top:14px"><button type="button" id="polaris-account-open" class="btn btn--ghost">Alterar minha senha</button></div>
     </form>
 
     <div class="app-footer">
@@ -3079,11 +3079,11 @@ document.getElementById("compareExportPdfBtn").addEventListener("click", exportC
     if (!header || document.getElementById('polaris-admin-open')) return;
     const btn = document.createElement('button'); btn.id = 'polaris-admin-open'; btn.type = 'button'; btn.className = 'icon-btn'; btn.title = 'Administração de acessos'; btn.textContent = 'ADM';
     btn.style.cssText = 'width:auto;padding:0 10px;font-size:11px;font-weight:800;';
-    btn.addEventListener('click', () => { adminModal.hidden = false; loadUsers(); loadRoles(); }); header.appendChild(btn);
+    btn.addEventListener('click', () => { adminModal.hidden = false; adminModal.style.display = 'grid'; document.body.classList.add('admin-open'); loadUsers(); loadRoles(); }); header.appendChild(btn);
   }
 
   async function enter(session) {
-    window.polarisAccessToken = session.access_token; addAccountEntry();
+    window.polarisAccessToken = session.access_token;
     const profile = await getProfile(session.user.id);
     if (!profile.is_active) throw new Error('Seu usuário está desativado. Procure o responsável pelo Polaris.');
     gate.style.display = 'none';
@@ -3149,8 +3149,7 @@ document.getElementById("compareExportPdfBtn").addEventListener("click", exportC
     if (data.session) await enter(data.session);
   });
   const accountModal = document.getElementById('polaris-account-modal');
-  function addAccountEntry() { if (document.getElementById('polaris-account-open')) return; const header = document.querySelector('.header__right'); if (!header) return; const btn = document.createElement('button'); btn.id = 'polaris-account-open'; btn.type = 'button'; btn.className = 'icon-btn'; btn.title = 'Alterar minha senha'; btn.textContent = 'Senha'; btn.style.cssText = 'width:auto;padding:0 10px;font-size:11px;font-weight:800;'; btn.addEventListener('click', () => { accountModal.hidden = false; accountModal.style.display = 'grid'; }); header.appendChild(btn); }
-  addAccountEntry();
+  document.getElementById('polaris-account-open').addEventListener('click', () => { accountModal.hidden = false; accountModal.style.display = 'grid'; });
   document.getElementById('polaris-account-close').addEventListener('click', () => { accountModal.hidden = true; accountModal.style.display = 'none'; });
   document.getElementById('polaris-account-form').addEventListener('submit', async (event) => { event.preventDefault(); const msg = document.getElementById('polaris-account-message'); const a = document.getElementById('polaris-account-password').value; const b = document.getElementById('polaris-account-password-confirm').value; if (a.length < 8) return msg.textContent = 'A senha deve ter pelo menos 8 caracteres.'; if (a !== b) return msg.textContent = 'As senhas não conferem.'; const { error } = await sb.auth.updateUser({ password: a }); msg.textContent = error ? authErrorMessage(error) : 'Sua senha foi alterada com sucesso.'; if (!error) event.target.reset(); });
   document.getElementById('polaris-admin-close').addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); adminModal.hidden = true; adminModal.style.display = 'none'; document.body.classList.remove('admin-open'); });
