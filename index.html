@@ -835,7 +835,7 @@ body.tv-mode #panel-painel .topic-pill__count { font-size: clamp(22px, 2.4vw, 42
         <button type="submit" class="btn btn--primary">Salvar configurações</button>
         <button type="button" id="resetBtn" class="btn btn--ghost">Restaurar padrão</button>
       </div>
-      <p id="savedMsg" class="saved-msg" style="display:none">Configurações pessoais salvas para este usuário.</p><div class="actions" style="margin-top:14px"><button type="button" id="polaris-account-open" class="btn btn--ghost">Alterar minha senha</button></div>
+      <p id="savedMsg" class="saved-msg" style="display:none">Configurações pessoais salvas para este usuário.</p><div class="actions" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="polaris-account-open" class="btn btn--ghost">Alterar minha senha</button><button type="button" id="polaris-signout-btn" class="btn btn--ghost">Sair / Trocar de conta</button></div>
     </form>
 
     <div class="app-footer">
@@ -3398,6 +3398,12 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
   });
   const accountModal = document.getElementById('polaris-account-modal');
   document.getElementById('polaris-account-open').addEventListener('click', () => { accountModal.hidden = false; accountModal.style.display = 'grid'; });
+  document.getElementById('polaris-signout-btn').addEventListener('click', async () => {
+    const button = document.getElementById('polaris-signout-btn');
+    button.disabled = true;
+    button.textContent = 'Saindo...';
+    try { await sb.auth.signOut(); } finally { window.location.reload(); }
+  });
   document.getElementById('polaris-account-close').addEventListener('click', () => { accountModal.hidden = true; accountModal.style.display = 'none'; });
   document.getElementById('polaris-account-form').addEventListener('submit', async (event) => { event.preventDefault(); const msg = document.getElementById('polaris-account-message'); const a = document.getElementById('polaris-account-password').value; const b = document.getElementById('polaris-account-password-confirm').value; if (a.length < 8) return msg.textContent = 'A senha deve ter pelo menos 8 caracteres.'; if (a !== b) return msg.textContent = 'As senhas não conferem.'; const { error } = await sb.auth.updateUser({ password: a }); msg.textContent = error ? authErrorMessage(error) : 'Sua senha foi alterada com sucesso.'; if (!error) event.target.reset(); });
   document.getElementById('polaris-admin-close').addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); adminModal.hidden = true; adminModal.style.display = 'none'; document.body.classList.remove('admin-open'); });
