@@ -532,7 +532,7 @@ body.tv-mode #panel-painel .topic-pill__count { font-size: clamp(22px, 2.4vw, 42
   <div class="polaris-admin-card">
     <div class="polaris-admin-head"><div><p class="polaris-auth-kicker">ADMINISTRAÇÃO</p><h2>Usuários e permissões</h2></div><button id="polaris-admin-close" class="polaris-auth-link">Fechar</button></div>
     <div class="polaris-admin-tabs"><button data-admin-tab="users" class="is-active">Usuários</button><button data-admin-tab="roles">Perfis e telas</button><button data-admin-tab="requests">Solicitações</button><button data-admin-tab="learning">Aprendizado</button></div>
-    <section id="polaris-admin-users"><form id="polaris-user-form" class="polaris-admin-form"><input id="admin-user-email" type="email" required placeholder="e-mail @linx.com.br ou @totvs.com.br"/><input id="admin-user-name" required placeholder="Nome completo"/><input id="admin-user-password" type="password" minlength="8" placeholder="Senha prévia (opcional)" autocomplete="new-password"/><select id="admin-user-role"><option value="user">Usuário</option><option value="admin">Administrador</option></select><button class="polaris-auth-submit">Criar acesso</button></form><p style="font-size:12px;color:#5a6b70;margin-top:8px">Com senha prévia, o usuário entra imediatamente. Sem senha, ele recebe um convite para definir a própria senha.</p><div id="polaris-users-list"></div></section>
+    <section id="polaris-admin-users"><form id="polaris-user-form" class="polaris-admin-form"><input id="admin-user-email" type="email" required placeholder="e-mail @linx.com.br ou @totvs.com.br"/><input id="admin-user-name" required placeholder="Nome completo"/><input id="admin-user-password" type="password" minlength="8" placeholder="Senha prévia (opcional)" autocomplete="new-password"/><select id="admin-user-role"><option value="system:user">Usuário</option><option value="system:admin">Administrador</option><option value="system:master">Master</option></select><button class="polaris-auth-submit">Criar acesso</button></form><p style="font-size:12px;color:#5a6b70;margin-top:8px">Com senha prévia, o usuário entra imediatamente. Sem senha, ele recebe um convite para definir a própria senha.</p><div id="polaris-users-list"></div></section>
     <section id="polaris-admin-roles" hidden><form id="polaris-role-form" class="polaris-admin-form"><input id="admin-role-name" required placeholder="Nome do perfil"/><input id="admin-role-label" required placeholder="Rótulo do perfil"/><button class="polaris-auth-submit">Criar perfil</button></form><div id="polaris-roles-list"></div></section><section id="polaris-admin-requests" hidden><p class="card__note">Solicitações feitas pela tela de login. O acesso só é criado depois da aprovação do master.</p><div id="polaris-access-requests-list"><p>Abra esta aba para carregar solicitações.</p></div></section><section id="polaris-admin-learning" hidden><p class="card__note">Aqui aparecem apenas agrupamentos recorrentes ainda não classificados. O texto fica restrito ao master; nada é aplicado até você revisar e aprovar.</p><div id="polaris-learning-list"><p>Abra esta aba para carregar candidatos.</p></div></section>
     <p id="polaris-admin-message" class="polaris-auth-message"></p>
   </div>
@@ -3321,7 +3321,7 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
     if (!header || document.getElementById('polaris-admin-open')) return;
     const btn = document.createElement('button'); btn.id = 'polaris-admin-open'; btn.type = 'button'; btn.className = 'icon-btn'; btn.title = 'Administração de acessos'; btn.textContent = 'ADM';
     btn.style.cssText = 'width:auto;padding:0 10px;font-size:11px;font-weight:800;';
-    btn.addEventListener('click', () => { adminModal.hidden = false; adminModal.style.display = 'grid'; document.body.classList.add('admin-open'); loadUsers(); loadRoles(); }); header.appendChild(btn);
+    btn.addEventListener('click', () => { adminModal.hidden = false; adminModal.style.display = 'grid'; document.body.classList.add('admin-open'); loadAssignableRoles(); loadUsers(); loadRoles(); }); header.appendChild(btn);
   }
 
   async function enter(session) {
@@ -3451,14 +3451,45 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
     }));
     list.querySelectorAll('[data-request-reject]').forEach((btn) => btn.addEventListener('click', async () => { const id = btn.dataset.requestReject; const { error: rejectError } = await sb.from('polaris_access_requests').update({ status: 'rejected', reviewed_by: polarisUserId, reviewed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', id).eq('status', 'pending'); setAdminMessage(rejectError ? 'Não foi possível recusar a solicitação.' : 'Solicitação recusada.', !rejectError); loadAccessRequests(); }));
   }
+  let assignableRoles = [];
+  async function loadAssignableRoles() {
+    const { data, error } = await sb.from('app_roles').select('id,name,label,is_system').order('name');
+    if (error) return;
+    assignableRoles = data || [];
+    const options = '<option value="system:user">Usuário</option><option value="system:admin">Administrador</option><option value="system:master">Master</option>' + assignableRoles.filter((r) => !r.is_system && !['user','admin','master'].includes(r.name)).map((r) => `<option value="role:${esc(r.id)}">${esc(r.label || r.name)}</option>`).join('');
+    const createSelect = document.getElementById('admin-user-role');
+    if (createSelect) createSelect.innerHTML = options;
+    document.querySelectorAll('[data-edit-role]').forEach((select) => { const current = select.value; select.innerHTML = options; if ([...select.options].some((o) => o.value === current)) select.value = current; });
+  }
+  function roleOptionValue(baseRole, customRoleId) { return customRoleId ? `role:${customRoleId}` : `system:${baseRole || 'user'}`; }
   async function loadUsers() {
     const list = document.getElementById('polaris-users-list'); list.textContent = 'Carregando…';
-    const { data, error } = await sb.from('app_profiles').select('id,email,full_name,role,is_active,created_at').order('created_at', { ascending: false });
-    if (error) return list.textContent = 'Não foi possível carregar usuários.';
-    list.innerHTML = data.map((u) => `<div class="polaris-admin-row"><span>${esc(u.full_name || 'Sem nome')}<br><small>${esc(u.email)}</small></span><span>${esc(u.role)}</span><span>${u.is_active ? 'Ativo' : 'Inativo'}</span><button type="button" data-toggle-user="${esc(u.id)}" data-active="${u.is_active}">${u.is_active ? 'Desativar' : 'Ativar'}</button></div>`).join('') || '<p>Nenhum usuário.</p>';
-    list.querySelectorAll('[data-toggle-user]').forEach((btn) => btn.addEventListener('click', async () => { const { error } = await sb.from('app_profiles').update({ is_active: btn.dataset.active !== 'true', updated_at: new Date().toISOString() }).eq('id', btn.dataset.toggleUser); if (error) setAdminMessage('Operação não autorizada.'); else loadUsers(); }));
+    const [{ data, error }, { data: links }] = await Promise.all([
+      sb.from('app_profiles').select('id,email,full_name,role,is_active,created_at').order('created_at', { ascending: false }),
+      sb.from('app_user_roles').select('user_id,role_id,app_roles(id,name,label,is_system)')
+    ]);
+    if (error) { list.textContent = 'Não foi possível carregar usuários.'; return; }
+    const roleByUser = new Map((links || []).map((x) => [x.user_id, x.app_roles]));
+    const options = '<option value="system:user">Usuário</option><option value="system:admin">Administrador</option><option value="system:master">Master</option>' + assignableRoles.filter((r) => !r.is_system && !['user','admin','master'].includes(r.name)).map((r) => `<option value="role:${esc(r.id)}">${esc(r.label || r.name)}</option>`).join('');
+    list.innerHTML = (data || []).map((u) => {
+      const custom = roleByUser.get(u.id);
+      const selected = roleOptionValue(u.role, custom?.id);
+      const protectedMaster = u.role === 'master' && ['ruan.nascimento@linx.com.br','ruan.nascimento@totvs.com.br'].includes((u.email || '').toLowerCase());
+      return `<div class="polaris-admin-row" style="grid-template-columns:1.35fr 210px 90px auto;align-items:center"><span><strong>${esc(u.full_name || 'Sem nome')}</strong><br><small>${esc(u.email)}</small></span><select data-edit-role="${esc(u.id)}" data-current-role="${esc(selected)}">${options}</select><span>${u.is_active ? 'Ativo' : 'Inativo'}</span><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" data-save-user="${esc(u.id)}">Salvar perfil</button><button type="button" data-toggle-user="${esc(u.id)}" data-active="${u.is_active}" ${protectedMaster ? 'disabled title="Master principal protegido"' : ''}>${u.is_active ? 'Desativar' : 'Ativar'}</button></span></div>`;
+    }).join('') || '<p>Nenhum usuário.</p>';
+    list.querySelectorAll('[data-edit-role]').forEach((select) => { select.value = select.dataset.currentRole; });
+    list.querySelectorAll('[data-save-user]').forEach((btn) => btn.addEventListener('click', async () => {
+      const select = list.querySelector(`[data-edit-role="${btn.dataset.saveUser}"]`); const value = select.value; const [kind, id] = value.split(':');
+      btn.disabled = true; btn.textContent = 'Salvando…';
+      const { error: saveError } = await sb.functions.invoke('admin-invite-v5', { body: { action: 'update_profile', user_id: btn.dataset.saveUser, role: kind === 'system' ? id : 'user', role_id: kind === 'role' ? id : null } });
+      btn.disabled = false; btn.textContent = 'Salvar perfil'; setAdminMessage(saveError ? `Falha ao atualizar perfil: ${saveError.message || 'operação não autorizada.'}` : 'Perfil atualizado.', !saveError); if (!saveError) loadUsers();
+    }));
+    list.querySelectorAll('[data-toggle-user]').forEach((btn) => btn.addEventListener('click', async () => {
+      if (!confirm(btn.dataset.active === 'true' ? 'Desativar este acesso?' : 'Reativar este acesso?')) return;
+      const { error: toggleError } = await sb.functions.invoke('admin-invite-v5', { body: { action: 'set_active', user_id: btn.dataset.toggleUser, is_active: btn.dataset.active !== 'true' } });
+      setAdminMessage(toggleError ? `Falha ao alterar acesso: ${toggleError.message || 'operação não autorizada.'}` : 'Acesso atualizado.', !toggleError); if (!toggleError) loadUsers();
+    }));
   }
-
   async function loadRoles() {
     const list = document.getElementById('polaris-roles-list'); list.textContent = 'Carregando…';
     const [{ data: roles, error }, { data: screens }] = await Promise.all([sb.from('app_roles').select('*').order('name'), sb.from('app_screens').select('*').order('label')]);
@@ -3472,11 +3503,11 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
     const email = document.getElementById('admin-user-email').value.trim().toLowerCase();
     const full_name = document.getElementById('admin-user-name').value.trim();
     const password = document.getElementById('admin-user-password').value;
-    const role = document.getElementById('admin-user-role').value;
+    const roleValue = document.getElementById('admin-user-role').value; const [roleKind, roleId] = roleValue.split(':'); const role = roleKind === 'system' ? roleId : 'user';
     if (!allowed(email)) return setAdminMessage('Domínio não permitido. Use @linx.com.br ou @totvs.com.br.');
     setAdminMessage(password ? 'Criando acesso com senha prévia…' : 'Enviando convite para definição de senha…');
     try {
-      const { data, error } = await sb.functions.invoke('admin-invite-v4', { body: { email, full_name, password, role, redirect_to: appRedirectUrl(), app_name: appName } });
+      const { data, error } = await sb.functions.invoke('admin-invite-v4', { body: { email, full_name, password, role, role_id: roleKind === 'role' ? roleId : null, redirect_to: appRedirectUrl(), app_name: appName } });
       if (error) {
         let detail = error.message || 'Falha ao criar o acesso.';
         try { const payload = await error.context?.json(); if (payload?.error) detail = payload.error; } catch {}
@@ -3489,7 +3520,7 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
       setAdminMessage(`Falha ao criar acesso: ${error?.message || 'erro de conexão.'}`);
     }
   });
-  document.getElementById('polaris-role-form').addEventListener('submit', async (event) => { event.preventDefault(); const name = document.getElementById('admin-role-name').value.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_'); const label = document.getElementById('admin-role-label').value.trim(); const { error } = await sb.from('app_roles').insert({ name, label, description: '', is_system: false }); setAdminMessage(error ? 'Não foi possível criar o perfil.' : 'Perfil criado.', !error); if (!error) { event.target.reset(); loadRoles(); } });
+  document.getElementById('polaris-role-form').addEventListener('submit', async (event) => { event.preventDefault(); const name = document.getElementById('admin-role-name').value.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_'); const label = document.getElementById('admin-role-label').value.trim(); const { error } = await sb.from('app_roles').insert({ name, label, description: '', is_system: false }); setAdminMessage(error ? 'Não foi possível criar o perfil.' : 'Perfil criado.', !error); if (!error) { event.target.reset(); loadRoles(); loadAssignableRoles(); } });
 
   loadLearnedSubjectRules();
   sb.auth.getSession().then(async ({ data }) => { if (!data.session) return; if (passwordFlow) return showPasswordSetup(); try { await enter(data.session); } catch { await sb.auth.signOut(); } });
