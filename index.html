@@ -2255,19 +2255,40 @@ async function fetchHourlyMetrics({ fromDate, toDate, selectedQueues } = {}) {
   const isSpecificSubset = Array.isArray(selectedQueues) && selectedQueues.length > 0;
 
   if (isSpecificSubset) {
-    // Primeiro tenta filtrar no banco (mais rápido).
-    const exactRows = await fetchHourlyMetricsRaw({ fromDate, toDate, queueNames: selectedQueues });
-    if (exactRows.length > 0) return aggregateAllQueues(exactRows);
+    // Consulta cada fila pelo nome exato. Em algumas combinações de nomes com
+    // aspas, hífens ou pontuação, o filtro PostgREST `in.(...)` pode não
+    // corresponder como esperado; `eq` individual evita essa ambiguidade.
+    const uniqueQueues = [...new Set(selectedQueues.map((q) => String(q || "").trim()).filter(Boolean))];
+    const exactPages = await Promise.all(uniqueQueues.map(async (queueName) => {
+      try {
+        return await fetchHourlyMetricsRaw({ fromDate, toDate, queueName });
+      } catch (err) {
+        console.warn(`[Polaris] Falha ao consultar fila individual "${queueName}":`, err);
+        return [];
+      }
+    }));
+    const exactRows = exactPages.flat();
+    if (exactRows.length > 0) {
+      // Se pelo menos uma fila foi encontrada, completa as demais via fallback
+      // normalizado para não descartar filas por variações de escrita.
+      const foundNames = new Set(exactRows.map((r) => normalizeQueueName(r.queue_name)));
+      const missingQueues = uniqueQueues.filter((q) => !foundNames.has(normalizeQueueName(q)));
+      if (missingQueues.length === 0) return aggregateAllQueues(exactRows);
 
-    // Fallback para históricos antigos com variações de caixa, acentos,
-    // espaços ou hífens no nome da fila.
+      const allRows = await fetchHourlyMetricsRaw({ fromDate, toDate });
+      const wantedMissing = new Set(missingQueues.map(normalizeQueueName));
+      const fallbackRows = allRows.filter((row) => wantedMissing.has(normalizeQueueName(row.queue_name)));
+      return aggregateAllQueues(exactRows.concat(fallbackRows));
+    }
+
+    // Fallback para dados históricos com diferenças de caixa, acentos,
+    // espaços ou pontuação no queue_name gravado no banco.
     const allRows = await fetchHourlyMetricsRaw({ fromDate, toDate });
-    const wanted = new Set(selectedQueues.map(normalizeQueueName));
+    const wanted = new Set(uniqueQueues.map(normalizeQueueName));
     const matchingRows = allRows.filter((row) => wanted.has(normalizeQueueName(row.queue_name)));
     if (matchingRows.length > 0) return aggregateAllQueues(matchingRows);
 
-    // Não apresentar a linha consolidada como se fosse uma fila individual:
-    // isso mostraria volumes incorretos para o filtro escolhido.
+    // Nunca usar a linha consolidada como se fosse uma fila individual.
     return [];
   }
 
