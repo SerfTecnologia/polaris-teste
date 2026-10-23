@@ -2241,26 +2241,41 @@ function aggregateAllQueues(rows) {
   })).sort((a, b) => (a.metric_date + a.hour).localeCompare(b.metric_date + b.hour));
 }
 
+// Normaliza nomes para tolerar diferenças de caixa, acentos e pontuação
+// entre o nome exibido no seletor e o queue_name persistido no Supabase.
+function normalizeQueueName(value) {
+  return String(value || "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
 // selectedQueues: null/undefined = todas as filas de Food. Array = só essas filas.
 async function fetchHourlyMetrics({ fromDate, toDate, selectedQueues } = {}) {
   const isSpecificSubset = Array.isArray(selectedQueues) && selectedQueues.length > 0;
 
   if (isSpecificSubset) {
-    // Filas específicas: sempre busca por fila individual e agrega no
-    // cliente só as escolhidas (não existe linha pré-agregada pra um
-    // subconjunto arbitrário de filas).
-    const perQueue = await fetchHourlyMetricsRaw({ fromDate, toDate, queueNames: selectedQueues });
-    return aggregateAllQueues(perQueue);
+    // Primeiro tenta filtrar no banco (mais rápido).
+    const exactRows = await fetchHourlyMetricsRaw({ fromDate, toDate, queueNames: selectedQueues });
+    if (exactRows.length > 0) return aggregateAllQueues(exactRows);
+
+    // Fallback para históricos antigos com variações de caixa, acentos,
+    // espaços ou hífens no nome da fila.
+    const allRows = await fetchHourlyMetricsRaw({ fromDate, toDate });
+    const wanted = new Set(selectedQueues.map(normalizeQueueName));
+    const matchingRows = allRows.filter((row) => wanted.has(normalizeQueueName(row.queue_name)));
+    if (matchingRows.length > 0) return aggregateAllQueues(matchingRows);
+
+    // Não apresentar a linha consolidada como se fosse uma fila individual:
+    // isso mostraria volumes incorretos para o filtro escolhido.
+    return [];
   }
 
-  // Todas as filas: primeiro tenta a linha consolidada "TODAS (Food)", que é
-  // mais barata de consultar.
+  // Todas as filas: usa a linha consolidada quando disponível.
   const consolidated = await fetchHourlyMetricsRaw({ fromDate, toDate, queueName: QUEUE_NAME_ALL });
   if (consolidated.length > 0) return consolidated;
 
-  // Se não existir (job de coleta ainda não grava essa linha, ou grava só
-  // por fila individual), busca tudo e agrega no cliente — assim a aba nunca
-  // fica vazia/travada só por causa de uma linha agregada que não existe.
+  // Se não existir linha consolidada, busca linhas por fila e agrega.
   const perQueue = await fetchHourlyMetricsRaw({ fromDate, toDate });
   return aggregateAllQueues(perQueue);
 }
@@ -2655,9 +2670,19 @@ async function loadReports(forceRefresh = false) {
 
     const startedAt = performance.now();
     const all = await renderComparisons(selectedQueues);
-    renderHeatmap(all);
-    renderForecast(all);
-    renderHistoryRange(all);
+    if (selectedQueues && selectedQueues.length && all.length === 0) {
+      const msg = 'Não há histórico individual para as filas selecionadas. A tabela hourly_metrics pode conter somente o consolidado “TODAS (Food)”. Para filtrar por fila, o processo de coleta precisa gravar métricas individuais por queue_name.';
+      heatmapWrap.innerHTML = `<p class="reports-empty">${msg}</p>`;
+      forecastBody.innerHTML = `<tr><td colspan="4" class="reports-empty">${msg}</td></tr>`;
+      const historyText = document.getElementById("historyRangeText");
+      const historyChart = document.getElementById("historyRangeChart");
+      if (historyText) historyText.textContent = msg;
+      if (historyChart) historyChart.innerHTML = "";
+    } else {
+      renderHeatmap(all);
+      renderForecast(all);
+      renderHistoryRange(all);
+    }
     lastReportsAll = all;
     lastReportsQueueKey = queueKey;
     lastReportsLoadedAt = Date.now();
