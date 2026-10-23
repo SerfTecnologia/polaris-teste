@@ -2130,13 +2130,8 @@ window.polarisStartPanel = () => {
   setInterval(refreshPanel, 30000);
 };
 // A aba oculta não faz polling: evita consumir a origem quando o usuário não está vendo o painel.
-// Mantém a aba de Inteligência viva enquanto estiver aberta, sem precisar
-// reabrir a aba ou clicar em "Atualizar" — a cada 5 min ela busca de novo o
-// histórico (mesmo intervalo da coleta), o que também é o que faz a hora
-// recém-fechada aparecer no mapa de calor e na previsão sem intervenção.
-setInterval(() => {
-  if (panelToggleBtn.dataset.current === "reports") loadReports();
-}, 5 * 60 * 1000);
+// Não recarrega todo o histórico a cada 5 minutos. A atualização leve de hoje,
+// abaixo, mantém os números atuais atualizados sem repetir a consulta de 120 dias.
 
 // ======================================================================
 // Inteligência & Relatórios — histórico, comparativos, heatmap, previsão
@@ -2172,28 +2167,43 @@ function postgrestInList(values) {
 }
 
 async function fetchHourlyMetricsRaw({ fromDate, toDate, queueName, queueNames } = {}) {
-  const params = new URLSearchParams();
-  params.set("select", "metric_date,hour,weekday,week_of_month,iso_week,month,year,ended_count_hour,ended_count_accum_day,tme_seconds,tma_seconds,service_level,losses_percentage,waiting_count,queue_name");
-  if (queueName) {
-    params.set("queue_name", `eq.${queueName}`);
-  } else if (queueNames && queueNames.length > 0) {
-    params.set("queue_name", postgrestInList(queueNames));
-  }
-  params.set("order", "metric_date.asc,hour.asc");
-  if (fromDate) params.append("metric_date", `gte.${fromDate}`);
-  if (toDate) params.append("metric_date", `lte.${toDate}`);
+  // O PostgREST/Supabase normalmente limita cada resposta a 1.000 linhas.
+  // Sem paginação, o histórico de 120 dias fica truncado e comparações como
+  // ontem/semana passada podem aparecer como "sem dados", mesmo existindo.
+  const PAGE_SIZE = 1000;
+  const allRows = [];
+  let offset = 0;
 
-  const res = await fetchWithTimeout(`${SUPABASE_REST_BASE}/hourly_metrics?${params.toString()}`, {
-    headers: {
-      "apikey": SUPABASE_PUBLISHABLE_KEY,
-      "Authorization": `Bearer ${window.polarisAccessToken || SUPABASE_PUBLISHABLE_KEY}`,
-    },
-  });
-  if (!res.ok) {
-    const bodyText = await res.text().catch(() => "");
-    throw new Error(`HTTP ${res.status} ao consultar histórico${bodyText ? ` — ${bodyText.slice(0, 200)}` : ""}`);
+  while (true) {
+    const params = new URLSearchParams();
+    params.set("select", "metric_date,hour,weekday,week_of_month,iso_week,month,year,ended_count_hour,ended_count_accum_day,tme_seconds,tma_seconds,service_level,losses_percentage,waiting_count,queue_name");
+    if (queueName) {
+      params.set("queue_name", `eq.${queueName}`);
+    } else if (queueNames && queueNames.length > 0) {
+      params.set("queue_name", postgrestInList(queueNames));
+    }
+    params.set("order", "metric_date.asc,hour.asc,queue_name.asc");
+    params.set("limit", String(PAGE_SIZE));
+    params.set("offset", String(offset));
+    if (fromDate) params.append("metric_date", `gte.${fromDate}`);
+    if (toDate) params.append("metric_date", `lte.${toDate}`);
+
+    const res = await fetchWithTimeout(`${SUPABASE_REST_BASE}/hourly_metrics?${params.toString()}`, {
+      headers: {
+        "apikey": SUPABASE_PUBLISHABLE_KEY,
+        "Authorization": `Bearer ${window.polarisAccessToken || SUPABASE_PUBLISHABLE_KEY}`,
+      },
+    });
+    if (!res.ok) {
+      const bodyText = await res.text().catch(() => "");
+      throw new Error(`HTTP ${res.status} ao consultar histórico${bodyText ? ` — ${bodyText.slice(0, 200)}` : ""}`);
+    }
+    const page = await res.json();
+    allRows.push(...page);
+    if (page.length < PAGE_SIZE) break;
+    offset += page.length;
   }
-  return res.json();
+  return allRows;
 }
 
 // Agrupa linhas por fila em uma única linha "TODAS" por (data, hora),
@@ -2335,8 +2345,14 @@ function computeComparisons(all, todayWeekdayHint) {
   const rowsYesterday = all.filter((r) => r.metric_date === yesterday);
   const rowsLastWeek = all.filter((r) => r.metric_date === lastWeekSameDay);
 
-  const todayWeekday = rowsToday[0]?.weekday ?? todayWeekdayHint ?? (new Date().getDay() || 7);
-  const historicalSameWeekday = all.filter((r) => r.weekday === todayWeekday && r.metric_date !== today);
+  const weekdayFromDate = (dateISO) => {
+    const day = new Date(`${dateISO}T00:00:00`).getDay();
+    return day || 7; // ISO: segunda=1 ... domingo=7
+  };
+  const todayWeekday = weekdayFromDate(today) || rowsToday[0]?.weekday || todayWeekdayHint || 7;
+  // Deriva o dia da semana da própria data para não depender do tipo/valor
+  // gravado na coluna weekday (que pode variar entre números e texto).
+  const historicalSameWeekday = all.filter((r) => weekdayFromDate(r.metric_date) === todayWeekday && r.metric_date !== today);
   const historicalAvgTotal = (() => {
     const byDate = {};
     historicalSameWeekday.forEach((r) => { byDate[r.metric_date] = (byDate[r.metric_date] || 0) + (r.ended_count_hour || 0); });
@@ -2603,28 +2619,58 @@ function renderHistoryRange(all) {
 }
 
 let reportsLoaded = false;
-let lastReportsAll = []; // cache do último dataset completo carregado, pra reaproveitar no refresh leve
-async function loadReports() {
+let lastReportsAll = []; // cache em memória do histórico já consultado
+let reportsLoadInFlight = false;
+let lastReportsQueueKey = null;
+let lastReportsLoadedAt = 0;
+
+function renderCachedReports(all) {
+  computeComparisons(all);
+  renderHeatmap(all);
+  renderForecast(all);
+  renderHistoryRange(all);
+}
+
+async function loadReports(forceRefresh = false) {
   const grid = document.getElementById("comparisonsGrid");
   const heatmapWrap = document.getElementById("heatmapWrap");
   const forecastBody = document.getElementById("forecastTableBody");
-  try {
-    grid.innerHTML = '<p class="reports-loading">Carregando…</p>';
-    heatmapWrap.innerHTML = '<p class="reports-loading">Carregando…</p>';
-    forecastBody.innerHTML = '<tr><td colspan="4" class="reports-loading">Carregando…</td></tr>';
+  const selectedQueues = loadReportsSelectedQueues();
+  const queueKey = JSON.stringify(selectedQueues || []);
 
-    const all = await renderComparisons(loadReportsSelectedQueues());
+  // Reabrir a aba não deve buscar novamente 120 dias de dados. Reutiliza o
+  // histórico em memória e atualiza somente os dados do dia em segundo plano.
+  if (!forceRefresh && reportsLoaded && queueKey === lastReportsQueueKey && lastReportsAll.length) {
+    renderCachedReports(lastReportsAll);
+    refreshReportsToday();
+    return;
+  }
+  // Evita consultas históricas duplicadas por cliques rápidos/troca de aba.
+  if (reportsLoadInFlight) return;
+  reportsLoadInFlight = true;
+  try {
+    grid.innerHTML = '<p class="reports-loading">Carregando histórico…</p>';
+    heatmapWrap.innerHTML = '<p class="reports-loading">Carregando histórico…</p>';
+    forecastBody.innerHTML = '<tr><td colspan="4" class="reports-loading">Carregando histórico…</td></tr>';
+
+    const startedAt = performance.now();
+    const all = await renderComparisons(selectedQueues);
     renderHeatmap(all);
     renderForecast(all);
     renderHistoryRange(all);
     lastReportsAll = all;
+    lastReportsQueueKey = queueKey;
+    lastReportsLoadedAt = Date.now();
     reportsLoaded = true;
+    console.info(`[Polaris] Histórico dos relatórios carregado em ${((performance.now() - startedAt) / 1000).toFixed(1)}s (${all.length} registros agregados).`);
   } catch (err) {
     console.error("[Polaris] Falha ao carregar Inteligência & Relatórios:", err);
     const msg = `Não foi possível carregar os relatórios (${escapeHtml(err.message)}).`;
     grid.innerHTML = `<p class="reports-empty">${msg}</p>`;
     heatmapWrap.innerHTML = `<p class="reports-empty">${msg}</p>`;
     forecastBody.innerHTML = `<tr><td colspan="4" class="reports-empty">${msg}</td></tr>`;
+  } finally {
+    reportsLoadInFlight = false;
   }
 }
 
@@ -2634,7 +2680,7 @@ async function loadReports() {
 // de comparação refletirem a hora corrente sem esperar ela fechar — e sem
 // custar uma consulta pesada no banco a cada rodada.
 async function refreshReportsToday() {
-  if (panelToggleBtn.dataset.current !== "reports" || !reportsLoaded) return;
+  if (panelToggleBtn.dataset.current !== "reports" || !reportsLoaded || reportsLoadInFlight) return;
   try {
     const today = todayLocalISODate();
     const todayRows = await fetchHourlyMetrics({ fromDate: today, toDate: today, selectedQueues: loadReportsSelectedQueues() });
@@ -2652,7 +2698,7 @@ async function refreshReportsToday() {
 // carga no banco — bem abaixo do teto de 5-10min combinado.
 setInterval(refreshReportsToday, 60 * 1000);
 
-document.getElementById("refreshReportsBtn").addEventListener("click", loadReports);
+document.getElementById("refreshReportsBtn").addEventListener("click", () => loadReports(true));
 
 // ===================== Seletor de filas da aba de Inteligência =====================
 // Independente do seletor da tela de Configurações: aqui dá pra restringir a
