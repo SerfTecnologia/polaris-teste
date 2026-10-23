@@ -2390,7 +2390,7 @@ function renderHeatmap(all) {
   const today = todayLocalISODate();
   const todayWeekday = new Date().getDay() || 7;
   const currentHour = new Date().getHours();
-  const mondayThisWeek = isoMondayOf(today);
+  const mondayThisWeek = mondayOfWeekISO(today);
   const sundayThisWeek = addDaysISO(mondayThisWeek, 6);
 
   // Separa: (1) valor REAL desta semana (horas já fechadas), (2) valor parcial da
