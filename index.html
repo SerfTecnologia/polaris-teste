@@ -1606,6 +1606,15 @@ const reportsToggleBtn = document.getElementById("reportsToggleBtn");
 const monitorToggleBtn = document.getElementById("monitorToggleBtn");
 const tvModeBtn = document.getElementById("tvModeBtn");
 panelToggleBtn.innerHTML = GEAR_ICON;
+function applyTvVolumeVisibility(settings = tvSettings) {
+  const targetBar = document.querySelector(".target-bar");
+  if (!targetBar) return;
+  // A preferência de volume controla exclusivamente o modo TV.
+  // Fora do modo TV, o indicador continua disponível na tela principal.
+  const shouldShow = !document.body.classList.contains("tv-mode") || settings?.tvVolumeIndicatorEnabled !== false;
+  targetBar.style.display = shouldShow ? "" : "none";
+  targetBar.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+}
 function setTvMode(enabled) {
   // Um usuário associado ao perfil personalizado "tv" não pode sair do modo TV pela interface.
   if (polarisTvOnlyMode) enabled = true;
@@ -1614,6 +1623,7 @@ function setTvMode(enabled) {
   tvModeBtn.classList.toggle("is-active-tab", enabled);
   tvModeBtn.title = enabled ? "Sair do modo TV" : "Abrir modo TV";
   tvModeBtn.setAttribute("aria-label", tvModeBtn.title);
+  applyTvVolumeVisibility(enabled ? { ...tvSettings, ...loadSettings("tv") } : tvSettings);
   if (enabled) { setPanel("painel"); renderPanelWithCurrentData(); }
   else if (latestPanelData) renderPanelWithCurrentData();
 }
@@ -1924,11 +1934,10 @@ document.getElementById("saveTvSettingsBtn").addEventListener("click", async () 
     await saveSettingsToStorage(tvSettings, "tv");
     msg.textContent = "Configuração da TV salva. Os indicadores serão atualizados agora.";
     msg.style.display = "block";
+    applyTvVolumeVisibility(tvSettings);
     if (document.body.classList.contains("tv-mode") && latestPanelData) {
       renderTopicsCard(latestPanelData.fila?.rows || [], latestPanelData.andamento?.rows || [], tvSettings);
       renderTvAgentTmaCard(latestPanelData.andamento?.rows || [], tvSettings);
-      const targetBar = document.querySelector(".target-bar");
-      if (targetBar) targetBar.style.display = tvSettings.tvVolumeIndicatorEnabled === false ? "none" : "";
     }
     refreshPanel().catch(() => {});
   } catch (error) {
@@ -2467,7 +2476,14 @@ let panelRefreshInFlight = false;
 async function refreshPanel() {
   if (document.hidden || panelRefreshInFlight) return;
   panelRefreshInFlight = true;
-  const settings = loadSettings(document.body.classList.contains("tv-mode") ? "tv" : "personal");
+  const isTvModeNow = document.body.classList.contains("tv-mode");
+  // Na TV, usar a configuração TV já carregada/salva e manter a visibilidade
+  // sincronizada a cada atualização; não depender apenas do estado inicial do DOM.
+  const settings = isTvModeNow
+    ? { ...tvSettings, ...loadSettings("tv") }
+    : loadSettings("personal");
+  if (isTvModeNow) tvSettings = { ...tvSettings, ...settings };
+  applyTvVolumeVisibility(settings);
   const skills = getActiveSkills(settings);
   const errorBanner = document.getElementById("errorBanner");
   const connStatus = document.getElementById("connStatus");
@@ -2530,8 +2546,7 @@ async function refreshPanel() {
   // a tela de monitoramento completo) — evita 3 chamadas repetidas.
   const agentTableBody = document.getElementById("agentTableBody");
   const agentError = document.getElementById("agentError");
-  const targetBar = document.querySelector(".target-bar");
-  if (targetBar) targetBar.style.display = document.body.classList.contains("tv-mode") && settings.tvVolumeIndicatorEnabled === false ? "none" : "";
+  applyTvVolumeVisibility(settings);
   applyAgentSectionVisibility(settings);
   if (document.body.classList.contains("tv-mode")) document.getElementById("agentSection").style.display = "none";
   applyAgentSubjectColumnVisibility(settings);
