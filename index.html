@@ -453,6 +453,9 @@
 </style>
 <style>
 .polaris-auth-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;background:radial-gradient(circle at 20% 20%,#153a45,#07151b 55%,#040a0d);padding:24px}.polaris-auth-card,.polaris-admin-card{width:min(460px,100%);background:#f8fbfc;border:1px solid rgba(255,255,255,.25);border-radius:22px;box-shadow:0 24px 80px #0008;padding:34px;color:#102229}.polaris-auth-mark{width:72px;height:72px;border-radius:18px;display:grid;place-items:center;background:#0b7488;color:#fff;font-weight:800;font-size:25px;overflow:hidden}.polaris-auth-mark img{width:100%;height:100%;object-fit:cover}.polaris-auth-kicker{font-size:11px;letter-spacing:.16em;font-weight:800;color:#0b7488;margin:22px 0 8px}.polaris-auth-card h1,.polaris-admin-card h2{margin:0 0 10px}.polaris-auth-copy{color:#5a6b70;line-height:1.55}.polaris-auth-form,.polaris-admin-form{display:grid;gap:12px;margin-top:22px}.polaris-auth-form label{display:grid;gap:6px;font-size:13px;font-weight:700}.polaris-auth-form input,.polaris-admin-form input,.polaris-admin-form select{border:1px solid #cbd8dc;border-radius:10px;padding:12px;background:#fff;font:inherit}.polaris-auth-submit,.polaris-auth-secondary{border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}.polaris-auth-submit{background:#0b7488;color:#fff}.polaris-auth-secondary{background:#e6f1f3;color:#0b5a69}.polaris-auth-link{border:0;background:none;color:#0b7488;cursor:pointer;text-decoration:underline}.polaris-auth-message{min-height:20px;font-size:13px;color:#a3342a}.polaris-auth-form[hidden]{display:none!important}.tv-mode-btn svg{width:19px;height:19px}.tv-settings-card{border:1px solid rgba(11,116,136,.18)}body.tv-mode .header__right,body.tv-mode #reportsToggleBtn,body.tv-mode #monitorToggleBtn,body.tv-mode #panelToggleBtn,body.tv-mode #polaris-admin-open{display:none!important}body.tv-mode .header{justify-content:space-between}body.tv-mode .header__brand{display:flex!important;align-items:center}body.tv-mode #panel-config,body.tv-mode #panel-reports,body.tv-mode #panel-monitor{display:none!important}body.tv-mode #panel-painel{display:flex!important;flex:1 1 auto;width:100%;max-width:none;min-width:0;margin:0;overflow:hidden}body.tv-mode .app{padding:0}
+/* Perfil TV: somente visualização na interface; a autorização de dados também deve ser aplicada no backend/RLS. */
+body.tv-only #panel-config, body.tv-only #panel-reports, body.tv-only #panel-monitor,
+body.tv-only #polaris-account-open, body.tv-only #polaris-signout-btn, body.tv-only #polaris-admin-open { display: none !important; }
 /* Modo TV: composição fluida para monitores, TVs e resoluções ultrawide */
 body.tv-mode { overflow: hidden; }
 body.tv-mode .page {
@@ -617,6 +620,24 @@ body.tv-mode #panel-painel { overflow: auto !important; }
     body.tv-mode .topics-grid { grid-template-columns: minmax(0, 1fr); }
   }
 </style>
+<style>
+
+/* Cards independentes do modo TV: categorias e atendimentos com maior tempo. */
+body.tv-mode #panel-painel .tv-agent-tma-card { flex: 0 0 auto; max-height: 24vh; overflow: auto; }
+body.tv-mode #panel-painel .tv-agent-tma-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(8px, .8vw, 14px); }
+.tv-agent-tma-item { min-width: 0; padding: clamp(10px, .9vw, 16px); border: 1px solid #d6e8ed; border-radius: 12px; background: #f8fcfd; display: grid; gap: 5px; }
+.tv-agent-tma-item__top { display:flex; align-items:center; justify-content:space-between; gap:8px; min-width:0; }
+.tv-agent-tma-item__name { font-weight:800; overflow-wrap:anywhere; }
+.tv-agent-tma-item__time { font-size:clamp(20px, 1.8vw, 34px); font-weight:900; white-space:nowrap; color:#0b7488; font-variant-numeric:tabular-nums; }
+.tv-agent-tma-item__detail { font-size:clamp(12px, .9vw, 17px); color:#526b75; overflow-wrap:anywhere; }
+.tv-agent-tma-item__subject { font-size:clamp(12px, .95vw, 18px); font-weight:650; overflow-wrap:anywhere; }
+.tv-agent-tma-item__link { color:#087d95; text-decoration:underline; }
+.topic-pill__breakdown { display:flex; gap:10px; flex-wrap:wrap; color:#55717b; font-size:clamp(11px, .8vw, 15px); font-weight:700; }
+.topic-pill__breakdown span { white-space:nowrap; }
+@media (max-width: 1000px) { body.tv-mode #panel-painel .tv-agent-tma-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { body.tv-mode #panel-painel .tv-agent-tma-grid { grid-template-columns: minmax(0, 1fr); } }
+
+</style>
 </head>
 <body>
 <div id="polaris-auth-gate" class="polaris-auth-gate">
@@ -780,11 +801,21 @@ body.tv-mode #panel-painel { overflow: auto !important; }
     <section id="topicsCard" class="topics-card" style="display:none">
       <div class="topics-card__head">
         <div>
-          <h2>Assuntos semelhantes na fila</h2>
-          <p class="topics-card__hint" id="topicsHint">Agrupamento automático por palavras-chave do motivo de contato.</p>
+          <h2>Atendimentos por categoria</h2>
+          <p class="topics-card__hint" id="topicsHint">Resumo de clientes em fila e em atendimento por categoria.</p>
         </div>
       </div>
       <div id="topicsGrid" class="topics-grid"></div>
+    </section>
+
+    <section id="tvAgentTmaCard" class="topics-card tv-agent-tma-card" style="display:none">
+      <div class="topics-card__head">
+        <div>
+          <h2>Atendimentos com maior tempo</h2>
+          <p class="topics-card__hint" id="tvAgentTmaHint">Atendimentos que ultrapassaram o limite de tempo configurado.</p>
+        </div>
+      </div>
+      <div id="tvAgentTmaGrid" class="tv-agent-tma-grid"></div>
     </section>
 
     <p id="errorBanner" class="error-banner" style="display:none"></p>
@@ -938,9 +969,9 @@ body.tv-mode #panel-painel { overflow: auto !important; }
         <div class="card__title"><span class="card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span><h2>Modo TV</h2></div>
         <p class="card__note">A TV usa uma configuração independente da sua tela principal. Salvar aqui não altera suas metas ou preferências pessoais.</p>
         <div class="field field--switch"><label>Exibir indicador de volume na TV</label><label class="switch"><input type="checkbox" id="tvVolumeIndicatorEnabled" checked /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
-        <div class="field field--switch"><label>Exibir assuntos semelhantes por categoria</label><label class="switch"><input type="checkbox" id="tvSimilarIssuesEnabled" checked /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
-        <div class="field field--switch"><label>Exibir analistas acima do TMA na TV</label><label class="switch"><input type="checkbox" id="tvAgentTmaTableEnabled" /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
-        <div class="field field--switch"><label>Exibir assunto e link na visão detalhada da TV</label><label class="switch"><input type="checkbox" id="tvAgentShowSubjectLink" /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
+        <div class="field field--switch"><label>Exibir categorias com clientes em fila e em atendimento</label><label class="switch"><input type="checkbox" id="tvSimilarIssuesEnabled" checked /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
+        <div class="field field--switch"><label>Exibir atendimentos com maior tempo na TV</label><label class="switch"><input type="checkbox" id="tvAgentTmaTableEnabled" /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
+        <div class="field field--switch"><label>Exibir assunto e link nos atendimentos da TV</label><label class="switch"><input type="checkbox" id="tvAgentShowSubjectLink" /><span class="switch__track"><span class="switch__thumb"></span></span></label></div>
         <div class="actions"><button type="button" id="saveTvSettingsBtn" class="btn btn--ghost">Salvar configuração da TV</button></div>
         <p id="tvSavedMsg" class="saved-msg" style="display:none">Configuração da TV salva.</p>
       </div>
@@ -1248,11 +1279,15 @@ const DEFAULT_SETTINGS = {
   agentShowSubjectLink: true,
   tvVolumeIndicatorEnabled: true,
   tvSimilarIssuesEnabled: true,
+  tvAgentTmaTableEnabled: false,
+  tvAgentShowSubjectLink: false,
 };
 
 const LS_KEY = "orionWebSettings";
 let polarisUserId = null;
 let activeSettingsScope = "personal";
+// Perfil personalizado "tv": inicia diretamente no painel e bloqueia navegação para telas administrativas.
+let polarisTvOnlyMode = false;
 let tvSettings = { ...DEFAULT_SETTINGS };
 function settingsStorageKey(scope = "personal") { return `${LS_KEY}:${scope}:${polarisUserId || "anonymous"}`; }
 function loadSettings(scope = activeSettingsScope) {
@@ -1345,6 +1380,8 @@ const monitorToggleBtn = document.getElementById("monitorToggleBtn");
 const tvModeBtn = document.getElementById("tvModeBtn");
 panelToggleBtn.innerHTML = GEAR_ICON;
 function setTvMode(enabled) {
+  // Um usuário associado ao perfil personalizado "tv" não pode sair do modo TV pela interface.
+  if (polarisTvOnlyMode) enabled = true;
   document.body.classList.toggle("tv-mode", enabled);
   activeSettingsScope = enabled ? "tv" : "personal";
   tvModeBtn.classList.toggle("is-active-tab", enabled);
@@ -1361,6 +1398,8 @@ function isPanelActive(name) {
 }
 
 function setPanel(name) {
+  // Perfis TV permanecem no painel principal.
+  if (polarisTvOnlyMode) name = "painel";
   document.getElementById("panel-painel").classList.toggle("is-active", name === "painel");
   document.getElementById("panel-config").classList.toggle("is-active", name === "config");
   document.getElementById("panel-reports").classList.toggle("is-active", name === "reports");
@@ -1585,8 +1624,22 @@ function applyAgentSubjectColumnVisibility(settings) {
 
 let currentSettings = loadSettings();
 
-function fillTvForm(s) { document.getElementById("tvVolumeIndicatorEnabled").checked = s.tvVolumeIndicatorEnabled !== false; document.getElementById("tvSimilarIssuesEnabled").checked = s.tvSimilarIssuesEnabled !== false; document.getElementById("tvAgentTmaTableEnabled").checked = !!s.agentTmaTableEnabled; document.getElementById("tvAgentShowSubjectLink").checked = !!s.agentShowSubjectLink; }
-function getTvSettings() { return { ...tvSettings, tvVolumeIndicatorEnabled: document.getElementById("tvVolumeIndicatorEnabled").checked, tvSimilarIssuesEnabled: document.getElementById("tvSimilarIssuesEnabled").checked, agentTmaTableEnabled: document.getElementById("tvAgentTmaTableEnabled").checked, agentShowSubjectLink: document.getElementById("tvAgentShowSubjectLink").checked }; }
+function fillTvForm(s) {
+  document.getElementById("tvVolumeIndicatorEnabled").checked = s.tvVolumeIndicatorEnabled !== false;
+  document.getElementById("tvSimilarIssuesEnabled").checked = s.tvSimilarIssuesEnabled !== false;
+  // Preferência de TV própria; fallback para as chaves antigas apenas na migração.
+  document.getElementById("tvAgentTmaTableEnabled").checked = s.tvAgentTmaTableEnabled !== undefined ? !!s.tvAgentTmaTableEnabled : !!s.agentTmaTableEnabled;
+  document.getElementById("tvAgentShowSubjectLink").checked = s.tvAgentShowSubjectLink !== undefined ? !!s.tvAgentShowSubjectLink : !!s.agentShowSubjectLink;
+}
+function getTvSettings() {
+  return {
+    ...tvSettings,
+    tvVolumeIndicatorEnabled: document.getElementById("tvVolumeIndicatorEnabled").checked,
+    tvSimilarIssuesEnabled: document.getElementById("tvSimilarIssuesEnabled").checked,
+    tvAgentTmaTableEnabled: document.getElementById("tvAgentTmaTableEnabled").checked,
+    tvAgentShowSubjectLink: document.getElementById("tvAgentShowSubjectLink").checked,
+  };
+}
 function fillForm(s) {
   f.queueFirstAlertSeconds.value = s.queueFirstAlertSeconds;
   f.queueReminderMinutes.value = s.queueReminderMinutes;
@@ -1635,7 +1688,30 @@ form.addEventListener("submit", (e) => {
   setTimeout(() => (savedMsg.style.display = "none"), 2500);
 });
 
-document.getElementById("saveTvSettingsBtn").addEventListener("click", async () => { tvSettings = getTvSettings(); await saveSettingsToStorage(tvSettings, "tv"); const msg = document.getElementById("tvSavedMsg"); msg.style.display = "block"; setTimeout(() => (msg.style.display = "none"), 2500); });
+document.getElementById("saveTvSettingsBtn").addEventListener("click", async () => {
+  const button = document.getElementById("saveTvSettingsBtn");
+  const msg = document.getElementById("tvSavedMsg");
+  button.disabled = true;
+  try {
+    tvSettings = getTvSettings();
+    await saveSettingsToStorage(tvSettings, "tv");
+    msg.textContent = "Configuração da TV salva. Os indicadores serão atualizados agora.";
+    msg.style.display = "block";
+    if (document.body.classList.contains("tv-mode") && latestPanelData) {
+      renderTopicsCard(latestPanelData.fila?.rows || [], latestPanelData.andamento?.rows || [], tvSettings);
+      renderTvAgentTmaCard(latestPanelData.andamento?.rows || [], tvSettings);
+      const targetBar = document.querySelector(".target-bar");
+      if (targetBar) targetBar.style.display = tvSettings.tvVolumeIndicatorEnabled === false ? "none" : "";
+    }
+    refreshPanel().catch(() => {});
+  } catch (error) {
+    msg.textContent = "Não foi possível salvar a configuração da TV. Verifique a conexão e tente novamente.";
+    msg.style.display = "block";
+  } finally {
+    button.disabled = false;
+    setTimeout(() => { msg.style.display = "none"; }, 3500);
+  }
+});
 document.getElementById("resetBtn").addEventListener("click", () => {
   currentSettings = { ...DEFAULT_SETTINGS };
   saveSettingsToStorage(currentSettings);
@@ -2035,68 +2111,118 @@ async function submitSubjectCandidates(filaRows) {
 const TOPICS_VISIBLE_LIMIT = 6; // pills visíveis antes de precisar expandir — otimizado pra não quebrar o layout da TV
 let topicsExpanded = false;
 
-function renderTopicsCard(filaRows, settings) {
+function renderTopicsCard(filaRows, attendanceRows, settings) {
   const card = document.getElementById("topicsCard");
   const grid = document.getElementById("topicsGrid");
   const hint = document.getElementById("topicsHint");
+  if (!card || !grid || !hint) return;
 
-  const topicsEnabled = document.body.classList.contains("tv-mode") ? settings.tvSimilarIssuesEnabled !== false : settings.similarIssuesEnabled;
-  if (!topicsEnabled) {
-    card.style.display = "none";
-    return;
-  }
+  const isTv = document.body.classList.contains("tv-mode");
+  const enabled = isTv ? settings.tvSimilarIssuesEnabled !== false : !!settings.similarIssuesEnabled;
+  if (!enabled) { card.style.display = "none"; return; }
 
-  const subjects = extractWaitingSubjects(filaRows);
-  submitSubjectCandidates(filaRows).catch(() => {});
+  const selectedSet = Array.isArray(settings.selectedQueues) && settings.selectedQueues.length
+    ? new Set(settings.selectedQueues.map((q) => String(q).toLowerCase())) : null;
+  const inSelectedQueues = (r) => !selectedSet || selectedSet.has(String(r.__filaBase || r.Fila || "").toLowerCase());
+  const queueRows = (Array.isArray(filaRows) ? filaRows : []).filter(inSelectedQueues);
+  const activeRows = (Array.isArray(attendanceRows) ? attendanceRows : []).filter(inSelectedQueues);
+  if (!isTv) submitSubjectCandidates(queueRows).catch(() => {});
 
-  if (!subjects || subjects.length === 0) {
-    // Ninguém em fila com assunto agora: o card some por completo (não
-    // ocupa espaço no layout principal, importante pro uso na TV).
+  const counts = new Map();
+  const add = (row, kind) => {
+    const subject = String(row.Assunto || "").trim();
+    if (!subject) return;
+    const key = categorizeSubject(subject) || "outros";
+    const item = counts.get(key) || { key, queue: 0, attendance: 0 };
+    item[kind] += 1;
+    counts.set(key, item);
+  };
+  queueRows.forEach((row) => add(row, "queue"));
+  activeRows.forEach((row) => add(row, "attendance"));
+  const sorted = [...counts.values()].sort((a, b) => (b.queue + b.attendance) - (a.queue + a.attendance));
+
+  if (!sorted.length) {
     card.style.display = "none";
     topicsExpanded = false;
     return;
   }
-
   card.style.display = "block";
-  hint.textContent = document.body.classList.contains("tv-mode") ? `Principais categorias na fila · ${subjects.length} cliente(s) aguardando` : `Agrupamento automático de ${subjects.length} cliente(s) em fila por categoria do assunto.`;
+  hint.textContent = isTv
+    ? `${queueRows.length} em fila · ${activeRows.length} em atendimento · principais categorias agora`
+    : `Agrupamento automático de ${queueRows.length} clientes em fila e ${activeRows.length} em atendimento.`;
 
-  const counts = {};
-  subjects.forEach((s) => {
-    const key = categorizeSubject(s) || "outros";
-    counts[key] = (counts[key] || 0) + 1;
-  });
-
-  const sortedKeys = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  const tvCategoryLimit = document.body.classList.contains("tv-mode") ? 4 : TOPICS_VISIBLE_LIMIT;
-  const visibleKeys = topicsExpanded && !document.body.classList.contains("tv-mode") ? sortedKeys : sortedKeys.slice(0, tvCategoryLimit);
-  const hiddenCount = sortedKeys.length - visibleKeys.length;
-
+  const limit = isTv ? 4 : TOPICS_VISIBLE_LIMIT;
+  const visible = topicsExpanded && !isTv ? sorted : sorted.slice(0, limit);
   grid.innerHTML = "";
-  visibleKeys.forEach((key) => {
-    const n = counts[key];
-    if (n === 0) return;
-    const label = SUBJECT_CATEGORY_LABEL[key] || key;
+  visible.forEach((item) => {
+    const total = item.queue + item.attendance;
     const pill = document.createElement("div");
-    pill.className = "topic-pill" + (key !== "outros" && n >= 3 ? " topic-pill--critical" : "");
-    pill.innerHTML = `<span class="topic-pill__count">${n}<small> / ${subjects.length}</small></span><span class="topic-pill__label">${label}</span>`;
+    pill.className = "topic-pill" + (item.key !== "outros" && total >= 3 ? " topic-pill--critical" : "");
+    const label = SUBJECT_CATEGORY_LABEL[item.key] || item.key;
+    pill.innerHTML = `<span class="topic-pill__count">${total}</span><span class="topic-pill__label">${escapeHtml(label)}</span><span class="topic-pill__breakdown"><span>Fila: ${item.queue}</span><span>Atend.: ${item.attendance}</span></span>`;
     grid.appendChild(pill);
   });
-
-  if (hiddenCount > 0) {
+  const hiddenCount = sorted.length - visible.length;
+  if (hiddenCount > 0 && !isTv) {
     const moreBtn = document.createElement("button");
-    moreBtn.type = "button";
-    moreBtn.className = "topic-pill topic-pill--more";
+    moreBtn.type = "button"; moreBtn.className = "topic-pill topic-pill--more";
     moreBtn.textContent = `+${hiddenCount} categoria${hiddenCount > 1 ? "s" : ""}`;
-    moreBtn.addEventListener("click", () => { topicsExpanded = true; renderTopicsCard(filaRows, settings); });
+    moreBtn.addEventListener("click", () => { topicsExpanded = true; renderTopicsCard(filaRows, attendanceRows, settings); });
     grid.appendChild(moreBtn);
-  } else if (topicsExpanded && sortedKeys.length > TOPICS_VISIBLE_LIMIT) {
+  } else if (topicsExpanded && !isTv && sorted.length > TOPICS_VISIBLE_LIMIT) {
     const lessBtn = document.createElement("button");
-    lessBtn.type = "button";
-    lessBtn.className = "topic-pill topic-pill--more";
-    lessBtn.textContent = "Mostrar menos";
-    lessBtn.addEventListener("click", () => { topicsExpanded = false; renderTopicsCard(filaRows, settings); });
+    lessBtn.type = "button"; lessBtn.className = "topic-pill topic-pill--more"; lessBtn.textContent = "Mostrar menos";
+    lessBtn.addEventListener("click", () => { topicsExpanded = false; renderTopicsCard(filaRows, attendanceRows, settings); });
     grid.appendChild(lessBtn);
   }
+}
+
+function parsePanelDurationSeconds(value) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  const text = String(value || "").trim();
+  if (!text) return null;
+  const parts = text.split(":").map((part) => Number(part));
+  if (!parts.length || parts.some((part) => !Number.isFinite(part))) return null;
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return null;
+}
+
+function renderTvAgentTmaCard(attendanceRows, settings) {
+  const card = document.getElementById("tvAgentTmaCard");
+  const grid = document.getElementById("tvAgentTmaGrid");
+  const hint = document.getElementById("tvAgentTmaHint");
+  if (!card || !grid || !hint) return;
+  const isTv = document.body.classList.contains("tv-mode");
+  if (!isTv || settings.tvAgentTmaTableEnabled !== true) { card.style.display = "none"; grid.innerHTML = ""; return; }
+
+  const selectedSet = Array.isArray(settings.selectedQueues) && settings.selectedQueues.length
+    ? new Set(settings.selectedQueues.map((q) => String(q).toLowerCase())) : null;
+  const rows = (Array.isArray(attendanceRows) ? attendanceRows : [])
+    .filter((row) => !selectedSet || selectedSet.has(String(row.__filaBase || row.Fila || "").toLowerCase()))
+    .map((row) => ({ ...row, __durationSeconds: parsePanelDurationSeconds(row.Tempo) }))
+    .filter((row) => row.__durationSeconds !== null && row.__durationSeconds >= (Number(settings.agentTmaFirstAlertMinutes) || DEFAULT_SETTINGS.agentTmaFirstAlertMinutes) * 60)
+    .sort((a, b) => b.__durationSeconds - a.__durationSeconds)
+    .slice(0, 4);
+
+  if (!rows.length) { card.style.display = "none"; grid.innerHTML = ""; return; }
+  card.style.display = "block";
+  hint.textContent = `Até ${rows.length} atendimentos acima de ${Number(settings.agentTmaFirstAlertMinutes) || DEFAULT_SETTINGS.agentTmaFirstAlertMinutes} min, ordenados pelo maior tempo.`;
+  const showDetails = settings.tvAgentShowSubjectLink === true;
+  grid.innerHTML = "";
+  rows.forEach((row) => {
+    const item = document.createElement("article");
+    item.className = "tv-agent-tma-item";
+    const name = String(row.Analista || "Analista não identificado");
+    const client = String(row.Cliente || "Cliente não identificado");
+    const subject = String(row.Assunto || "Assunto não informado");
+    const link = row.Link__href || row.Cliente__href || row.Analista__href;
+    const detailHtml = showDetails
+      ? `<div class="tv-agent-tma-item__subject">${escapeHtml(subject)}</div>${link ? `<a class="tv-agent-tma-item__detail tv-agent-tma-item__link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Abrir atendimento</a>` : `<div class="tv-agent-tma-item__detail">Link indisponível</div>`}`
+      : "";
+    item.innerHTML = `<div class="tv-agent-tma-item__top"><span class="tv-agent-tma-item__name">${escapeHtml(name)} · ${escapeHtml(client)}</span><span class="tv-agent-tma-item__time">${escapeHtml(String(row.Tempo || "–"))}</span></div><div class="tv-agent-tma-item__detail">${escapeHtml(String(row.Fila || "Fila não identificada"))}</div>${detailHtml}`;
+    grid.appendChild(item);
+  });
 }
 
 function tempoCellClass(level) {
@@ -2179,8 +2305,6 @@ async function refreshPanel() {
   const agentError = document.getElementById("agentError");
   const targetBar = document.querySelector(".target-bar");
   if (targetBar) targetBar.style.display = document.body.classList.contains("tv-mode") && settings.tvVolumeIndicatorEnabled === false ? "none" : "";
-  const topicsCard = document.getElementById("topicsCard");
-  if (topicsCard && document.body.classList.contains("tv-mode") && settings.tvSimilarIssuesEnabled === false) topicsCard.style.display = "none";
   applyAgentSectionVisibility(settings);
   if (document.body.classList.contains("tv-mode")) document.getElementById("agentSection").style.display = "none";
   applyAgentSubjectColumnVisibility(settings);
@@ -2191,7 +2315,8 @@ async function refreshPanel() {
     latestPanelData = panel;
     agentError.style.display = "none";
 
-    renderTopicsCard(panel.fila?.rows, settings);
+    renderTopicsCard(panel.fila?.rows || [], panel.andamento?.rows || [], settings);
+    renderTvAgentTmaCard(panel.andamento?.rows || [], settings);
     if (isPanelActive("monitor")) renderMonitorScreen(panel, settings);
 
     if (!settings.agentTmaTableEnabled || document.body.classList.contains("tv-mode")) { panelRefreshInFlight = false; return; }
@@ -3605,14 +3730,33 @@ document.getElementById("compareGranularity")?.addEventListener("change", () => 
     window.polarisAccessToken = session.access_token;
     polarisUserId = session.user.id;
     const profile = await getProfile(session.user.id);
+    // Perfis personalizados são vinculados por app_user_roles. Use o nome técnico "tv".
+    let assignedRoles = [];
+    try {
+      const { data: roleLinks, error: roleError } = await sb.from('app_user_roles').select('app_roles(name,label)').eq('user_id', session.user.id);
+      if (!roleError) assignedRoles = roleLinks || [];
+    } catch (roleLookupError) {
+      console.warn('[Polaris] Não foi possível consultar os perfis adicionais:', roleLookupError);
+    }
+    const isTvProfile = String(profile.role || '').toLowerCase() === 'tv' || assignedRoles.some((link) => {
+      const roleName = String(link.app_roles?.name || '').trim().toLowerCase();
+      const roleLabel = String(link.app_roles?.label || '').trim().toLowerCase();
+      return roleName === 'tv' || roleLabel === 'tv' || roleLabel === 'modo tv';
+    });
+    if (!profile.is_active) throw new Error('Seu usuário está desativado. Procure o responsável pelo Polaris.');
+    polarisTvOnlyMode = isTvProfile;
+    document.body.classList.toggle('tv-only', polarisTvOnlyMode);
     currentSettings = await loadSettingsFromCloud("personal");
     tvSettings = await loadSettingsFromCloud("tv");
-    activeSettingsScope = "personal";
+    activeSettingsScope = polarisTvOnlyMode ? "tv" : "personal";
     fillForm(currentSettings);
     fillTvForm(tvSettings);
-    if (!profile.is_active) throw new Error('Seu usuário está desativado. Procure o responsável pelo Polaris.');
     gate.style.display = 'none';
-    addAdminEntry(profile);
+    if (!polarisTvOnlyMode) addAdminEntry(profile);
+    if (polarisTvOnlyMode) {
+      setPanel('painel');
+      setTvMode(true);
+    }
     if (window.polarisStartPanel) window.polarisStartPanel();
   }
 
