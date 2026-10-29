@@ -543,6 +543,79 @@ body.tv-mode #panel-painel { overflow: auto !important; }
   body.tv-mode #panel-painel .grid-top { grid-template-columns: 1fr !important; }
   body.tv-mode #panel-painel .hero-col { grid-template-columns: 1fr 1fr; }
 }
+
+  /* ===================== Ajustes responsivos Polaris =====================
+     Mantém os IDs, fontes de dados e lógica de negócio existentes.
+     Os cards podem encolher junto com a viewport/zoom sem empurrar conteúdo.
+  */
+  *, *::before, *::after { box-sizing: border-box; }
+  html { min-width: 0; }
+  body { min-width: 0; }
+  .panel, .panel.is-active, #panel-painel { min-width: 0; }
+  .grid-top { grid-template-columns: minmax(220px, clamp(220px, 19vw, 340px)) minmax(0, 1fr); }
+  .hero-col, .stat-grid, .stat, .stat__head, .stat__label-wrap,
+  .target-bar, .target-bar__label-block, .target-bar__track-wrap,
+  .agent-section, .topics-card, .table-wrap { min-width: 0; }
+  .stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stat__head { align-items: flex-start; }
+  .stat__label-wrap { overflow-wrap: anywhere; }
+  .stat__label { line-height: 1.2; }
+  .stat__value {
+    max-width: 100%;
+    font-size: clamp(26px, min(3.3vw, 6.5vh), 50px);
+    line-height: 1.05;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat__value-secondary { font-size: clamp(12px, 1.15vw, 17px); }
+  .waiting-card__value { font-size: clamp(52px, min(6.6vw, 13vh), 108px); }
+  .mood-card__title { overflow-wrap: anywhere; }
+  .target-bar { gap: clamp(8px, 1vw, 18px); }
+  .target-bar__label-block { flex: 0 1 190px; }
+  .target-bar__count { white-space: nowrap; font-size: clamp(17px, 1.55vw, 22px); }
+  .target-bar__track-wrap { flex: 1 1 160px; }
+  .agent-section .table-wrap { overflow-x: auto; }
+  .agent-table { width: 100%; }
+  .agent-table th, .agent-table td { overflow-wrap: anywhere; }
+  .topics-grid { grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); }
+  .topic-pill { min-width: 0; }
+  .topic-pill__label { overflow-wrap: anywhere; }
+
+  /* TVs e monitores: limitar categorias a cards legíveis e sem quebra. */
+  body.tv-mode #topicsCard { width: 100%; }
+  body.tv-mode .topics-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, .7vw, 12px); }
+  body.tv-mode .topic-pill { padding: clamp(8px, .8vw, 14px); min-width: 0; }
+  body.tv-mode .topic-pill__count { font-size: clamp(22px, 2.2vw, 34px); white-space: nowrap; }
+  body.tv-mode .topic-pill__label { font-size: clamp(11px, 1vw, 15px); line-height: 1.2; }
+  body.tv-mode .grid-top, body.tv-mode .stat-grid { min-height: 0; }
+  body.tv-mode .stat { overflow: hidden; }
+
+  @media (max-width: 1100px) {
+    .grid-top { grid-template-columns: minmax(190px, 0.8fr) minmax(0, 1.8fr); }
+    .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto; }
+    .stat { min-height: 125px; }
+    body.tv-mode .topics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 760px) {
+    .grid-top { grid-template-columns: minmax(0, 1fr); }
+    .hero-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .waiting-card, .mood-card { min-height: 145px; }
+    .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .target-bar { flex-wrap: wrap; }
+    .target-bar__label-block { flex: 1 1 100%; }
+    .target-bar__track-wrap { flex: 1 1 100%; }
+    .target-bar__count { margin-left: auto; }
+    body.tv-mode .hero-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 480px) {
+    .hero-col, .stat-grid { grid-template-columns: minmax(0, 1fr); }
+    .waiting-card, .mood-card { min-height: 120px; }
+    .stat { min-height: 115px; }
+    .stat__value { font-size: clamp(28px, 9vw, 42px); }
+    .target-bar { padding: 12px; }
+    .target-bar__count { font-size: 18px; }
+    body.tv-mode .topics-grid { grid-template-columns: minmax(0, 1fr); }
+  }
 </style>
 </head>
 <body>
@@ -1985,7 +2058,7 @@ function renderTopicsCard(filaRows, settings) {
   }
 
   card.style.display = "block";
-  hint.textContent = `Agrupamento automático de ${subjects.length} cliente(s) em fila por categoria do assunto.`;
+  hint.textContent = document.body.classList.contains("tv-mode") ? `Principais categorias na fila · ${subjects.length} cliente(s) aguardando` : `Agrupamento automático de ${subjects.length} cliente(s) em fila por categoria do assunto.`;
 
   const counts = {};
   subjects.forEach((s) => {
@@ -1994,7 +2067,8 @@ function renderTopicsCard(filaRows, settings) {
   });
 
   const sortedKeys = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-  const visibleKeys = topicsExpanded ? sortedKeys : sortedKeys.slice(0, TOPICS_VISIBLE_LIMIT);
+  const tvCategoryLimit = document.body.classList.contains("tv-mode") ? 4 : TOPICS_VISIBLE_LIMIT;
+  const visibleKeys = topicsExpanded && !document.body.classList.contains("tv-mode") ? sortedKeys : sortedKeys.slice(0, tvCategoryLimit);
   const hiddenCount = sortedKeys.length - visibleKeys.length;
 
   grid.innerHTML = "";
