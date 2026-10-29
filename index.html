@@ -733,6 +733,54 @@ body.tv-mode #panel-painel .tv-agent-tma-grid { display: grid; grid-template-col
 }
 </style>
 
+
+<style id="polaris-tv-number-priority-final">
+/* Prioridade visual: manter métricas grandes; reduzir primeiro textos e módulos auxiliares. */
+body.tv-mode #panel-painel .stat-grid { min-width: 0 !important; }
+body.tv-mode #panel-painel .stat { min-width: 0 !important; overflow: hidden !important; }
+body.tv-mode #panel-painel .stat__value {
+  font-size: clamp(62px, min(5.6vw, 8.5vh), 98px) !important;
+  line-height: .98 !important;
+  letter-spacing: -.035em !important;
+  white-space: nowrap !important;
+  max-width: 100% !important;
+}
+body.tv-mode #panel-painel .stat__value-secondary {
+  font-size: clamp(14px, min(1.35vw, 2.1vh), 22px) !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+}
+/* Percentual longo recebe limite próprio para não escapar do card estreito. */
+body.tv-mode #panel-painel #serviceLevel {
+  font-size: clamp(44px, min(4.4vw, 7vh), 78px) !important;
+  letter-spacing: -.04em !important;
+}
+/* Em janelas estreitas, preserva os valores e compacta cabeçalhos e espaços. */
+@media (max-width: 1100px) {
+  body.tv-mode #panel-painel .stat { padding: 8px !important; }
+  body.tv-mode #panel-painel .stat__label { font-size: clamp(12px, 1vw, 15px) !important; line-height: 1.08 !important; }
+  body.tv-mode #panel-painel .stat__sublabel { font-size: clamp(10px, .78vw, 12px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .target-bar { gap: 7px !important; padding: 6px 8px !important; }
+  body.tv-mode #panel-painel .target-bar__label-block { flex-basis: 120px !important; min-width: 0 !important; }
+  body.tv-mode #panel-painel .target-bar__label { font-size: 11px !important; }
+  body.tv-mode #panel-painel .target-bar__hint,
+  body.tv-mode #panel-painel .target-bar__status { font-size: 10px !important; }
+  body.tv-mode #panel-painel .topics-card { padding: 7px 9px !important; max-height: 18vh !important; }
+  body.tv-mode #panel-painel .topics-card__head { margin-bottom: 5px !important; }
+  body.tv-mode #panel-painel .topics-card__head h2 { font-size: 13px !important; }
+  body.tv-mode #panel-painel .topics-card__hint { font-size: 10px !important; }
+  body.tv-mode #panel-painel .topic-pill__label { font-size: 11px !important; line-height: 1.12 !important; }
+  body.tv-mode #panel-painel .topic-pill { padding: 6px 8px !important; gap: 3px !important; }
+}
+@media (max-width: 760px) {
+  body.tv-mode { overflow: auto !important; }
+  body.tv-mode .page { height: auto !important; min-height: 100dvh !important; }
+  body.tv-mode #panel-painel { overflow: visible !important; }
+  body.tv-mode #panel-painel .stat__value { font-size: clamp(48px, 9vw, 68px) !important; }
+  body.tv-mode #panel-painel #serviceLevel { font-size: clamp(40px, 7.2vw, 58px) !important; }
+}
+</style>
+
 </head>
 <body>
 <div id="polaris-auth-gate" class="polaris-auth-gate">
