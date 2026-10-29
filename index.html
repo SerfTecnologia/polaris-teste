@@ -920,6 +920,28 @@ body.tv-mode #panel-painel .topic-pill.topic-pill--more {
 }
 </style>
 
+
+<style id="polaris-tv-categories-no-clip-v7">
+/* v7: remover o corte inferior no modo TV. O conteúdo pode crescer e a página rola apenas se a altura disponível não for suficiente. */
+@media (min-width: 761px) and (orientation: landscape) {
+  body.tv-mode { height: auto !important; min-height: 100dvh !important; overflow-x: hidden !important; overflow-y: auto !important; }
+  body.tv-mode .page { height: auto !important; min-height: 100dvh !important; overflow: visible !important; }
+  body.tv-mode .app { flex: 0 0 auto !important; min-height: 0 !important; height: auto !important; overflow: visible !important; }
+  body.tv-mode #panel-painel { flex: 0 0 auto !important; height: auto !important; min-height: 0 !important; overflow: visible !important; }
+  body.tv-mode #panel-painel .grid-top { flex: 0 0 auto !important; min-height: clamp(300px, 52vh, 520px) !important; height: auto !important; overflow: visible !important; }
+  body.tv-mode #panel-painel #topicsCard,
+  body.tv-mode #panel-painel #tvAgentTmaCard { flex: 0 0 auto !important; height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+  body.tv-mode #panel-painel .topics-grid { align-items: stretch !important; overflow: visible !important; }
+  body.tv-mode #panel-painel .topic-pill { height: auto !important; min-height: 100px !important; overflow: visible !important; }
+  body.tv-mode #panel-painel .topic-pill__label { display: block !important; -webkit-line-clamp: unset !important; overflow: visible !important; white-space: normal !important; }
+  body.tv-mode #panel-painel .topic-pill__breakdown { flex-wrap: wrap !important; white-space: normal !important; }
+}
+/* Em qualquer viewport, os cards de categoria nunca devem ser cortados pelo próprio cartão. */
+body.tv-mode #panel-painel #topicsCard { max-height: none !important; overflow: visible !important; }
+body.tv-mode #panel-painel #topicsCard .topics-grid { overflow: visible !important; }
+body.tv-mode #panel-painel #topicsCard .topic-pill { max-height: none !important; }
+</style>
+
 </head>
 <body>
 <div id="polaris-auth-gate" class="polaris-auth-gate">
