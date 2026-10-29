@@ -510,6 +510,142 @@ body.tv-mode #panel-painel .topic-pill__count { font-size: clamp(22px, 2.4vw, 42
 }
 .compare-bars-wrap{display:grid;gap:12px}.compare-bar-row{display:grid;grid-template-columns:180px 1fr 1fr 120px;gap:10px;align-items:center;font-size:12px}.compare-bar-track{height:18px;background:#e7eff1;border-radius:99px;overflow:hidden}.compare-bar-fill{height:100%;border-radius:99px}.compare-bar-fill.a{background:#0b7488}.compare-bar-fill.b{background:#ed8b3a}@media(max-width:700px){.compare-bar-row{grid-template-columns:1fr}}.polaris-admin-modal[hidden]{display:none!important}.polaris-auth-gate[hidden]{display:none!important}.polaris-admin-modal{position:fixed;inset:0;z-index:9999;background:#07151bcc;display:grid;place-items:center;padding:24px}.polaris-admin-card{width:min(980px,100%);max-height:90vh;overflow:auto}.polaris-admin-head{display:flex;justify-content:space-between;align-items:start}.polaris-admin-tabs{display:flex;gap:8px;border-bottom:1px solid #d9e2e5;margin:22px 0;padding-bottom:8px}.polaris-admin-tabs button{border:0;background:none;padding:8px 12px;cursor:pointer}.polaris-admin-tabs button.is-active{color:#0b7488;border-bottom:2px solid #0b7488;font-weight:800}.polaris-admin-form{grid-template-columns:repeat(4,1fr)}.polaris-admin-form button{border:0;border-radius:10px;background:#0b7488;color:#fff;font-weight:800}.polaris-admin-row{display:grid;grid-template-columns:1.5fr 1fr 120px 100px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #e5edef}.polaris-admin-row button{border:1px solid #b9c9ce;background:#fff;border-radius:8px;padding:7px;cursor:pointer}@media(max-width:700px){.polaris-admin-form{grid-template-columns:1fr}.polaris-admin-row{grid-template-columns:1fr}}
 </style>
+<style id="polaris-tv-readable-override">
+/* Modo TV: tipografia reforçada para leitura à distância, inclusive com zoom do navegador. */
+body.tv-mode .page { padding: clamp(12px, 1.4vw, 30px) !important; gap: clamp(12px, 1.2vw, 24px) !important; }
+body.tv-mode .header { min-height: clamp(82px, 10vh, 132px) !important; padding: clamp(14px, 1.5vw, 28px) clamp(20px, 2.2vw, 40px) !important; }
+body.tv-mode .header h1 { font-size: clamp(32px, 2.8vw, 56px) !important; line-height: 1.08 !important; }
+body.tv-mode .header__subtitle { font-size: clamp(16px, 1.35vw, 26px) !important; line-height: 1.3 !important; }
+body.tv-mode .header__mark { width: clamp(48px, 4vw, 76px) !important; height: clamp(48px, 4vw, 76px) !important; }
+body.tv-mode #panel-painel .grid-top { gap: clamp(14px, 1.5vw, 28px) !important; grid-template-columns: minmax(270px, .82fr) minmax(0, 2.18fr) !important; }
+body.tv-mode #panel-painel .stat-grid { gap: clamp(12px, 1.25vw, 24px) !important; }
+body.tv-mode #panel-painel .waiting-card__value { font-size: clamp(76px, 8vw, 150px) !important; line-height: 1 !important; }
+body.tv-mode #panel-painel .mood-card__title { font-size: clamp(28px, 2.4vw, 46px) !important; line-height: 1.12 !important; }
+body.tv-mode #panel-painel .mood-card__message { font-size: clamp(18px, 1.45vw, 28px) !important; line-height: 1.35 !important; }
+body.tv-mode #panel-painel .stat__label { font-size: clamp(19px, 1.5vw, 30px) !important; line-height: 1.2 !important; }
+body.tv-mode #panel-painel .stat__sublabel { font-size: clamp(16px, 1.15vw, 23px) !important; line-height: 1.25 !important; }
+body.tv-mode #panel-painel .stat__value { font-size: clamp(54px, 5.3vw, 104px) !important; line-height: 1.02 !important; }
+body.tv-mode #panel-painel .stat__value-secondary { font-size: clamp(22px, 1.8vw, 36px) !important; line-height: 1.15 !important; }
+body.tv-mode #panel-painel .topic-pill__count { font-size: clamp(30px, 2.8vw, 52px) !important; }
+body.tv-mode #panel-painel .topics-card { max-height: 22vh !important; }
+body.tv-mode #panel-painel .target-bar,
+body.tv-mode #panel-painel .target-bar *,
+body.tv-mode #panel-painel .topics-card,
+body.tv-mode #panel-painel .topics-card * { font-size: clamp(16px, 1.2vw, 24px) !important; line-height: 1.3 !important; }
+body.tv-mode #panel-painel .topics-card .topic-pill__count { font-size: clamp(30px, 2.8vw, 52px) !important; }
+/* A TV deve priorizar o painel, evitando que zoom/altura escondam métricas. */
+body.tv-mode #panel-painel { overflow: auto !important; }
+@media (min-width: 1200px) and (min-height: 650px) {
+  body.tv-mode #panel-painel .grid-top { min-height: 0; }
+  body.tv-mode #panel-painel .stat-grid > * { min-height: 0; }
+}
+@media (max-aspect-ratio: 4/3) {
+  body.tv-mode #panel-painel .grid-top { grid-template-columns: 1fr !important; }
+  body.tv-mode #panel-painel .hero-col { grid-template-columns: 1fr 1fr; }
+}
+</style>
+<style id="polaris-tv-fluid-max">
+/* Modo TV: escala agressiva e fluida conforme a área visível, sem depender do zoom do navegador. */
+body.tv-mode { overflow: hidden !important; }
+body.tv-mode .page {
+  box-sizing: border-box !important; width: 100vw !important; height: 100vh !important; height: 100dvh !important;
+  max-width: none !important; margin: 0 !important; padding: clamp(10px, 1.1vw, 28px) !important;
+  gap: clamp(10px, 1vw, 24px) !important; overflow: hidden !important;
+}
+body.tv-mode .header {
+  flex: 0 0 auto !important; min-height: clamp(76px, 9.5vh, 150px) !important;
+  padding: clamp(12px, 1.4vw, 32px) clamp(18px, 2vw, 44px) !important;
+  gap: clamp(12px, 1.5vw, 30px) !important; border-radius: clamp(12px, 1.1vw, 24px) !important;
+}
+body.tv-mode .header h1 { font-size: clamp(30px, 3.2vw, 72px) !important; line-height: 1.05 !important; }
+body.tv-mode .header__subtitle { font-size: clamp(17px, 1.65vw, 36px) !important; line-height: 1.2 !important; }
+body.tv-mode .header__mark { width: clamp(52px, 4.2vw, 92px) !important; height: clamp(52px, 4.2vw, 92px) !important; }
+body.tv-mode #panel-painel {
+  flex: 1 1 0 !important; min-height: 0 !important; height: auto !important;
+  overflow: auto !important; padding: 0 !important; gap: clamp(12px, 1.2vw, 28px) !important;
+}
+body.tv-mode #panel-painel .grid-top {
+  flex: 1 0 auto !important; min-height: min(68vh, 760px) !important; width: 100% !important;
+  grid-template-columns: minmax(260px, .78fr) minmax(0, 2.22fr) !important;
+  gap: clamp(12px, 1.4vw, 32px) !important;
+}
+body.tv-mode #panel-painel .hero-col { gap: clamp(12px, 1.2vw, 28px) !important; }
+body.tv-mode #panel-painel .waiting-card,
+body.tv-mode #panel-painel .mood-card { padding: clamp(18px, 1.8vw, 40px) !important; border-radius: clamp(12px, 1.1vw, 24px) !important; }
+body.tv-mode #panel-painel .waiting-card__label { font-size: clamp(20px, 1.8vw, 40px) !important; line-height: 1.15 !important; }
+body.tv-mode #panel-painel .waiting-card__value { font-size: clamp(84px, 8.5vw, 180px) !important; line-height: .98 !important; }
+body.tv-mode #panel-painel .mood-card__icon { width: clamp(56px, 5vw, 110px) !important; height: clamp(56px, 5vw, 110px) !important; }
+body.tv-mode #panel-painel .mood-card__title { font-size: clamp(30px, 2.6vw, 58px) !important; line-height: 1.08 !important; }
+body.tv-mode #panel-painel .mood-card__message { max-width: 100% !important; font-size: clamp(19px, 1.65vw, 36px) !important; line-height: 1.25 !important; }
+body.tv-mode #panel-painel .stat-grid { gap: clamp(12px, 1.3vw, 30px) !important; }
+body.tv-mode #panel-painel .stat-grid > * { min-width: 0 !important; padding: clamp(16px, 1.65vw, 36px) !important; border-radius: clamp(12px, 1vw, 22px) !important; }
+body.tv-mode #panel-painel .stat__label { font-size: clamp(22px, 2.05vw, 46px) !important; line-height: 1.12 !important; overflow-wrap: anywhere !important; }
+body.tv-mode #panel-painel .stat__sublabel { font-size: clamp(17px, 1.5vw, 34px) !important; line-height: 1.2 !important; }
+body.tv-mode #panel-painel .stat__value { font-size: clamp(68px, 7vw, 154px) !important; line-height: .98 !important; overflow-wrap: anywhere !important; }
+body.tv-mode #panel-painel .stat__value-secondary { font-size: clamp(26px, 2.2vw, 48px) !important; line-height: 1.12 !important; }
+body.tv-mode #panel-painel .target-bar,
+body.tv-mode #panel-painel .target-bar * { font-size: clamp(18px, 1.55vw, 34px) !important; line-height: 1.25 !important; }
+body.tv-mode #panel-painel .target-bar__count,
+body.tv-mode #panel-painel .target-bar__count * { font-size: clamp(32px, 3vw, 66px) !important; }
+body.tv-mode #panel-painel .topics-card { max-height: 28vh !important; overflow: auto !important; }
+body.tv-mode #panel-painel .topics-card,
+body.tv-mode #panel-painel .topics-card * { font-size: clamp(18px, 1.5vw, 34px) !important; line-height: 1.25 !important; }
+body.tv-mode #panel-painel .topics-card .topic-pill__count { font-size: clamp(32px, 3vw, 66px) !important; }
+/* Telas estreitas/verticais: mantém a fonte grande e permite rolagem em vez de comprimir os cartões. */
+@media (max-width: 1100px), (max-aspect-ratio: 4/3) {
+  body.tv-mode { overflow: auto !important; }
+  body.tv-mode .page { min-height: 100vh !important; height: auto !important; overflow: visible !important; }
+  body.tv-mode #panel-painel { overflow: visible !important; }
+  body.tv-mode #panel-painel .grid-top { grid-template-columns: minmax(0, 1fr) !important; min-height: 0 !important; }
+  body.tv-mode #panel-painel .hero-col { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  body.tv-mode #panel-painel .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; grid-template-rows: auto !important; }
+}
+@media (max-width: 560px) {
+  body.tv-mode #panel-painel .hero-col,
+  body.tv-mode #panel-painel .stat-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  body.tv-mode .header h1 { font-size: clamp(28px, 7vw, 42px) !important; }
+}
+</style>
+
+<style id="polaris-tv-ultra-responsive-fix">
+/* TV ULTRA: leitura a distância, com escala baseada na área útil da tela. */
+body.tv-mode { --tv-unit: min(1vw, 1.15vh); }
+body.tv-mode .page { width:100% !important; max-width:none !important; min-height:100vh !important; box-sizing:border-box !important; padding:clamp(16px, 1.6vw, 36px) !important; gap:clamp(14px, 1.35vw, 30px) !important; }
+body.tv-mode .header { min-height:clamp(90px, 10vh, 160px) !important; padding:clamp(18px, 2vw, 42px) !important; gap:clamp(16px, 1.5vw, 32px) !important; }
+body.tv-mode .header h1 { font-size:clamp(36px, 3.4vw, 76px) !important; line-height:1.05 !important; }
+body.tv-mode .header__subtitle { font-size:clamp(20px, 1.8vw, 40px) !important; line-height:1.2 !important; }
+body.tv-mode .header__mark { width:clamp(58px, 4.8vw, 100px) !important; height:clamp(58px, 4.8vw, 100px) !important; }
+body.tv-mode #panel-painel { width:100% !important; max-width:none !important; }
+body.tv-mode #panel-painel .grid-top { grid-template-columns:minmax(300px, .8fr) minmax(0, 2.2fr) !important; gap:clamp(16px, 1.6vw, 34px) !important; }
+body.tv-mode #panel-painel .hero-col { gap:clamp(14px, 1.4vw, 30px) !important; }
+body.tv-mode #panel-painel .waiting-card, body.tv-mode #panel-painel .mood-card { padding:clamp(22px, 2vw, 44px) !important; }
+body.tv-mode #panel-painel .waiting-card__label { font-size:clamp(24px, 2.2vw, 48px) !important; line-height:1.12 !important; }
+body.tv-mode #panel-painel .waiting-card__value { font-size:clamp(100px, 9.5vw, 200px) !important; line-height:.95 !important; }
+body.tv-mode #panel-painel .mood-card__title { font-size:clamp(34px, 3vw, 64px) !important; line-height:1.08 !important; }
+body.tv-mode #panel-painel .mood-card__message { font-size:clamp(22px, 1.9vw, 40px) !important; line-height:1.2 !important; }
+body.tv-mode #panel-painel .stat-grid { gap:clamp(14px, 1.5vw, 32px) !important; }
+body.tv-mode #panel-painel .stat-grid > * { padding:clamp(20px, 2vw, 42px) !important; min-width:0 !important; }
+body.tv-mode #panel-painel .stat__label { font-size:clamp(26px, 2.3vw, 50px) !important; line-height:1.1 !important; overflow-wrap:anywhere !important; }
+body.tv-mode #panel-painel .stat__sublabel { font-size:clamp(20px, 1.7vw, 36px) !important; line-height:1.2 !important; }
+body.tv-mode #panel-painel .stat__value { font-size:clamp(76px, 7.5vw, 164px) !important; line-height:.98 !important; overflow-wrap:anywhere !important; }
+body.tv-mode #panel-painel .stat__value-secondary { font-size:clamp(30px, 2.5vw, 54px) !important; line-height:1.1 !important; }
+body.tv-mode #panel-painel .target-bar, body.tv-mode #panel-painel .target-bar * { font-size:clamp(21px, 1.7vw, 38px) !important; line-height:1.2 !important; }
+body.tv-mode #panel-painel .target-bar__count, body.tv-mode #panel-painel .target-bar__count * { font-size:clamp(38px, 3.3vw, 72px) !important; }
+body.tv-mode #panel-painel .topics-card, body.tv-mode #panel-painel .topics-card * { font-size:clamp(20px, 1.65vw, 36px) !important; line-height:1.22 !important; }
+body.tv-mode #panel-painel .topics-card .topic-pill__count { font-size:clamp(36px, 3.2vw, 70px) !important; }
+@media (max-width: 1100px), (max-aspect-ratio: 4/3) {
+ body.tv-mode { overflow:auto !important; }
+ body.tv-mode .page { min-height:100vh !important; height:auto !important; overflow:visible !important; }
+ body.tv-mode #panel-painel { overflow:visible !important; }
+ body.tv-mode #panel-painel .grid-top { grid-template-columns:minmax(0,1fr) !important; }
+ body.tv-mode #panel-painel .hero-col { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+ body.tv-mode #panel-painel .stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)) !important; grid-template-rows:auto !important; }
+}
+@media (max-width: 600px) {
+ body.tv-mode #panel-painel .hero-col, body.tv-mode #panel-painel .stat-grid { grid-template-columns:minmax(0,1fr) !important; }
+}
+</style>
+
 </head>
 <body>
 <div id="polaris-auth-gate" class="polaris-auth-gate">
