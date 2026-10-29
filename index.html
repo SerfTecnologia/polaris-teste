@@ -781,6 +781,90 @@ body.tv-mode #panel-painel #serviceLevel {
 }
 </style>
 
+
+<style id="polaris-final-sizing-fix">
+/* Ajuste final: preservar o tamanho dos indicadores principais em zoom 100%,
+   inclusive quando a janela está dividida, e deixar os módulos inferiores crescerem. */
+.stat__value {
+  font-size: clamp(56px, min(5.8vw, 8.5vh), 96px) !important;
+  line-height: 1.02 !important;
+  white-space: nowrap !important;
+  font-variant-numeric: tabular-nums;
+  max-width: 100%;
+}
+.stat__value-secondary {
+  font-size: clamp(17px, 1.35vw, 25px) !important;
+  line-height: 1.1 !important;
+}
+/* Mantém os valores ainda mais legíveis no modo TV, sem depender de zoom de 50–75%. */
+body.tv-mode #panel-painel .stat__value {
+  font-size: clamp(68px, 6vw, 104px) !important;
+  line-height: 1.02 !important;
+}
+body.tv-mode #panel-painel .stat__value-secondary {
+  font-size: clamp(19px, 1.55vw, 30px) !important;
+}
+body.tv-mode #panel-painel .stat {
+  min-width: 0;
+  overflow: visible !important;
+  padding: clamp(10px, 1vw, 18px);
+}
+body.tv-mode #panel-painel .stat__head { gap: 7px; margin-bottom: 6px; }
+body.tv-mode #panel-painel .stat__label { font-size: clamp(13px, 1.05vw, 19px) !important; }
+body.tv-mode #panel-painel .stat__sublabel { font-size: clamp(11px, .85vw, 16px) !important; }
+/* Nunca cortar categorias ou cartões de TMA: a página cresce/rola se a tela não comportar tudo. */
+body.tv-mode .page {
+  height: auto !important;
+  min-height: 100dvh !important;
+  overflow: visible !important;
+  align-items: stretch;
+}
+body.tv-mode #panel-painel {
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  flex-direction: column !important;
+}
+body.tv-mode #panel-painel .grid-top {
+  flex: 0 0 auto !important;
+  min-height: clamp(390px, 52vh, 620px) !important;
+}
+body.tv-mode #panel-painel .topics-card,
+body.tv-mode #panel-painel .tv-agent-tma-card {
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  flex: 0 0 auto !important;
+}
+body.tv-mode #panel-painel .topics-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  align-items: stretch;
+}
+body.tv-mode #panel-painel .topic-pill { min-width: 0; overflow-wrap: anywhere; }
+body.tv-mode #panel-painel .topic-pill__label {
+  font-size: clamp(11px, .95vw, 15px) !important;
+  line-height: 1.2 !important;
+  overflow-wrap: anywhere;
+}
+body.tv-mode #panel-painel .tv-agent-tma-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)) !important;
+}
+@media (max-width: 1100px) {
+  .stat__value { font-size: clamp(52px, 6.2vw, 78px) !important; }
+  body.tv-mode #panel-painel .stat__value { font-size: clamp(68px, 7vw, 88px) !important; }
+  body.tv-mode #panel-painel .topics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 760px) {
+  .stat__value { font-size: clamp(48px, 9vw, 68px) !important; }
+  body.tv-mode #panel-painel .grid-top { min-height: 0 !important; }
+  body.tv-mode #panel-painel .topics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  body.tv-mode #panel-painel .stat__value { font-size: clamp(54px, 9vw, 72px) !important; }
+}
+@media (max-width: 480px) {
+  body.tv-mode #panel-painel .topics-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
+</style>
+
 </head>
 <body>
 <div id="polaris-auth-gate" class="polaris-auth-gate">
