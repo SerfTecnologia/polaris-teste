@@ -863,6 +863,61 @@ body.tv-mode #panel-painel .tv-agent-tma-grid {
 @media (max-width: 480px) {
   body.tv-mode #panel-painel .topics-grid { grid-template-columns: minmax(0, 1fr) !important; }
 }
+
+/* A preferência da TV deve prevalecer sobre regras de layout com display:flex !important. */
+body.tv-mode #panel-painel .target-bar.is-tv-volume-hidden {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Modo TV: usar o mesmo formato, escala tipográfica e cores dos cards da tela principal. */
+body.tv-mode #panel-painel .topics-card {
+  padding: clamp(12px, 1.3vw, 18px) clamp(14px, 1.5vw, 20px) !important;
+  border-radius: var(--radius-lg) !important;
+}
+body.tv-mode #panel-painel .topics-card__head { margin-bottom: 12px !important; gap: 10px !important; }
+body.tv-mode #panel-painel .topics-card__head h2 { font-size: 16px !important; line-height: normal !important; }
+body.tv-mode #panel-painel .topics-card__hint { font-size: 12px !important; line-height: normal !important; }
+body.tv-mode #panel-painel .topics-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)) !important;
+  gap: 10px !important;
+}
+body.tv-mode #panel-painel .topic-pill {
+  display: flex !important; flex-direction: column !important; align-items: stretch !important;
+  gap: 4px !important; padding: 12px 14px !important; border-radius: var(--radius-md) !important;
+  background: var(--canvas) !important; border: 1px solid var(--line) !important;
+  overflow-wrap: anywhere !important;
+}
+body.tv-mode #panel-painel .topic-pill__count {
+  font-size: 26px !important; line-height: 1 !important; font-weight: 800 !important;
+  white-space: normal !important; color: var(--indigo-700) !important;
+}
+body.tv-mode #panel-painel .topic-pill__count small { font-size: 14px !important; }
+body.tv-mode #panel-painel .topic-pill__label {
+  font-size: 13px !important; line-height: normal !important; font-weight: 700 !important;
+  overflow-wrap: anywhere !important;
+}
+body.tv-mode #panel-painel .topic-pill__breakdown {
+  display: flex !important; flex-wrap: wrap !important; gap: 10px !important;
+  font-size: 13px !important; line-height: normal !important; font-weight: 700 !important;
+}
+body.tv-mode #panel-painel .topic-pill__breakdown span { white-space: nowrap !important; }
+body.tv-mode #panel-painel .topic-pill.topic-pill--critical {
+  background: var(--red-crit-soft) !important; border-color: #f3cccc !important;
+}
+body.tv-mode #panel-painel .topic-pill.topic-pill--critical .topic-pill__count { color: var(--red-crit) !important; }
+body.tv-mode #panel-painel .topic-pill.topic-pill--more {
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  background: var(--canvas-edge) !important; border: 1px dashed var(--line) !important;
+  color: var(--teal-700) !important; font-size: 13px !important; font-weight: 700 !important;
+  cursor: pointer !important;
+}
 </style>
 
 </head>
@@ -1609,9 +1664,12 @@ panelToggleBtn.innerHTML = GEAR_ICON;
 function applyTvVolumeVisibility(settings = tvSettings) {
   const targetBar = document.querySelector(".target-bar");
   if (!targetBar) return;
-  // A preferência de volume controla exclusivamente o modo TV.
-  // Fora do modo TV, o indicador continua disponível na tela principal.
-  const shouldShow = !document.body.classList.contains("tv-mode") || settings?.tvVolumeIndicatorEnabled !== false;
+  // A preferência controla o indicador exclusivamente no modo TV.
+  // A classe específica prevalece sobre o CSS do modo TV, que força display:flex !important.
+  const inTvMode = document.body.classList.contains("tv-mode");
+  const volumeEnabled = settings?.tvVolumeIndicatorEnabled !== false;
+  const shouldShow = !inTvMode || volumeEnabled;
+  targetBar.classList.toggle("is-tv-volume-hidden", inTvMode && !volumeEnabled);
   targetBar.style.display = shouldShow ? "" : "none";
   targetBar.setAttribute("aria-hidden", shouldShow ? "false" : "true");
 }
@@ -2387,8 +2445,9 @@ function renderTopicsCard(filaRows, attendanceRows, settings) {
     ? `${queueRows.length} em fila · ${activeRows.length} em atendimento · principais categorias agora`
     : `Agrupamento automático de ${queueRows.length} clientes em fila e ${activeRows.length} em atendimento.`;
 
-  const limit = isTv ? 4 : TOPICS_VISIBLE_LIMIT;
-  const visible = topicsExpanded && !isTv ? sorted : sorted.slice(0, limit);
+  // Mantém o mesmo padrão da tela principal também na TV: seis cards e um resumo das demais.
+  const limit = TOPICS_VISIBLE_LIMIT;
+  const visible = topicsExpanded ? sorted : sorted.slice(0, limit);
   grid.innerHTML = "";
   visible.forEach((item) => {
     const total = item.queue + item.attendance;
@@ -2399,13 +2458,14 @@ function renderTopicsCard(filaRows, attendanceRows, settings) {
     grid.appendChild(pill);
   });
   const hiddenCount = sorted.length - visible.length;
-  if (hiddenCount > 0 && !isTv) {
+  if (hiddenCount > 0 && !topicsExpanded) {
     const moreBtn = document.createElement("button");
     moreBtn.type = "button"; moreBtn.className = "topic-pill topic-pill--more";
     moreBtn.textContent = `+${hiddenCount} categoria${hiddenCount > 1 ? "s" : ""}`;
+    moreBtn.setAttribute("aria-label", `${hiddenCount} categorias adicionais. Clique para expandir.`);
     moreBtn.addEventListener("click", () => { topicsExpanded = true; renderTopicsCard(filaRows, attendanceRows, settings); });
     grid.appendChild(moreBtn);
-  } else if (topicsExpanded && !isTv && sorted.length > TOPICS_VISIBLE_LIMIT) {
+  } else if (topicsExpanded && sorted.length > TOPICS_VISIBLE_LIMIT) {
     const lessBtn = document.createElement("button");
     lessBtn.type = "button"; lessBtn.className = "topic-pill topic-pill--more"; lessBtn.textContent = "Mostrar menos";
     lessBtn.addEventListener("click", () => { topicsExpanded = false; renderTopicsCard(filaRows, attendanceRows, settings); });
