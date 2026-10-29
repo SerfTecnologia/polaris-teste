@@ -638,6 +638,101 @@ body.tv-mode #panel-painel .tv-agent-tma-grid { display: grid; grid-template-col
 @media (max-width: 600px) { body.tv-mode #panel-painel .tv-agent-tma-grid { grid-template-columns: minmax(0, 1fr); } }
 
 </style>
+
+<style id="polaris-tv-fit-final">
+/* Ajuste final do wallboard: manter os indicadores grandes e acomodar os módulos ativos sem rolagem em telas horizontais. */
+@media (min-width: 761px) and (orientation: landscape) {
+  html, body { min-height: 100%; }
+  body.tv-mode { height: 100dvh !important; min-height: 0 !important; overflow: hidden !important; }
+  body.tv-mode .page {
+    display: flex !important; flex-direction: column !important;
+    width: 100vw !important; height: 100dvh !important; min-height: 0 !important;
+    padding: clamp(6px, .75vw, 14px) !important;
+    gap: clamp(6px, .65vw, 12px) !important; overflow: hidden !important;
+  }
+  body.tv-mode .header {
+    flex: 0 0 auto !important; min-height: clamp(58px, 8.5vh, 96px) !important;
+    padding: clamp(8px, .9vw, 16px) clamp(12px, 1.4vw, 24px) !important;
+    border-radius: clamp(10px, .9vw, 16px) !important;
+  }
+  body.tv-mode .header h1 { font-size: clamp(25px, 2.5vw, 44px) !important; line-height: 1.05 !important; }
+  body.tv-mode .header__subtitle { font-size: clamp(12px, 1.15vw, 20px) !important; line-height: 1.15 !important; }
+  body.tv-mode .header__mark { width: clamp(36px, 3.2vw, 56px) !important; height: clamp(36px, 3.2vw, 56px) !important; }
+  body.tv-mode .app { display: flex !important; flex: 1 1 auto !important; min-height: 0 !important; width: 100% !important; overflow: hidden !important; }
+  body.tv-mode #panel-painel {
+    display: flex !important; flex: 1 1 auto !important; flex-direction: column !important;
+    min-height: 0 !important; height: 100% !important; gap: clamp(6px, .65vw, 12px) !important;
+    padding: 0 !important; margin: 0 !important; overflow: hidden !important;
+  }
+  body.tv-mode #panel-painel .grid-top {
+    flex: 1 1 0 !important; min-height: 0 !important; height: auto !important;
+    grid-template-columns: minmax(190px, 27%) minmax(0, 1fr) !important;
+    gap: clamp(7px, .7vw, 13px) !important; overflow: hidden !important;
+  }
+  body.tv-mode #panel-painel .hero-col { display: flex !important; flex-direction: column !important; min-height: 0 !important; gap: clamp(7px, .7vw, 13px) !important; }
+  body.tv-mode #panel-painel .waiting-card,
+  body.tv-mode #panel-painel .mood-card { flex: 1 1 0 !important; min-height: 0 !important; height: auto !important; padding: clamp(10px, 1vw, 18px) !important; overflow: hidden !important; }
+  body.tv-mode #panel-painel .waiting-card__label { font-size: clamp(11px, .9vw, 16px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .waiting-card__value { font-size: clamp(62px, min(7.4vw, 12vh), 124px) !important; line-height: .95 !important; }
+  body.tv-mode #panel-painel .mood-card__icon svg { width: clamp(28px, 3vw, 48px) !important; height: auto !important; }
+  body.tv-mode #panel-painel .mood-card__title { font-size: clamp(20px, 2vw, 34px) !important; line-height: 1.05 !important; }
+  body.tv-mode #panel-painel .mood-card__message { font-size: clamp(12px, 1.15vw, 19px) !important; line-height: 1.2 !important; }
+  body.tv-mode #panel-painel .stat-grid {
+    display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important; min-height: 0 !important;
+    gap: clamp(7px, .7vw, 13px) !important; overflow: hidden !important;
+  }
+  body.tv-mode #panel-painel .stat { min-width: 0 !important; min-height: 0 !important; height: auto !important; padding: clamp(9px, .9vw, 16px) !important; overflow: hidden !important; }
+  body.tv-mode #panel-painel .stat__label { font-size: clamp(13px, 1.15vw, 20px) !important; line-height: 1.12 !important; }
+  body.tv-mode #panel-painel .stat__sublabel { font-size: clamp(10px, .85vw, 15px) !important; line-height: 1.15 !important; }
+  body.tv-mode #panel-painel .stat__value { font-size: clamp(38px, min(4.8vw, 8.3vh), 80px) !important; line-height: 1 !important; white-space: nowrap !important; }
+  body.tv-mode #panel-painel .stat__value-secondary { font-size: clamp(13px, 1.3vw, 22px) !important; line-height: 1 !important; }
+  body.tv-mode #panel-painel .target-bar {
+    display: flex !important; flex: 0 0 auto !important; min-height: 0 !important;
+    align-items: center !important; gap: clamp(8px, .8vw, 14px) !important;
+    padding: clamp(7px, .65vw, 12px) !important; overflow: hidden !important;
+  }
+  body.tv-mode #panel-painel .target-bar__label-block { flex: 0 1 170px !important; min-width: 110px !important; }
+  body.tv-mode #panel-painel .target-bar__label { font-size: clamp(11px, .95vw, 16px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .target-bar__hint { font-size: clamp(10px, .78vw, 13px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .target-bar__track-wrap { flex: 1 1 auto !important; min-width: 0 !important; }
+  body.tv-mode #panel-painel .target-bar__status { margin-top: 3px !important; font-size: clamp(10px, .8vw, 14px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .target-bar__count { flex: 0 0 auto !important; font-size: clamp(18px, 1.8vw, 30px) !important; line-height: 1 !important; }
+  body.tv-mode #panel-painel .target-bar__count span.dim { font-size: clamp(13px, 1.25vw, 21px) !important; }
+  body.tv-mode #panel-painel #topicsCard,
+  body.tv-mode #panel-painel #tvAgentTmaCard {
+    flex: 0 1 auto !important; min-height: 0 !important; max-height: 18vh !important;
+    padding: clamp(7px, .7vw, 12px) !important; overflow: hidden !important;
+  }
+  body.tv-mode #panel-painel .topics-card__head { margin-bottom: clamp(4px, .4vw, 7px) !important; gap: 4px !important; }
+  body.tv-mode #panel-painel .topics-card__head h2 { font-size: clamp(13px, 1.15vw, 19px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .topics-card__hint { font-size: clamp(10px, .8vw, 13px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .topics-grid { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: clamp(5px, .5vw, 9px) !important; min-height: 0 !important; }
+  body.tv-mode #panel-painel .topic-pill { display: grid !important; align-content: center !important; gap: 3px !important; min-width: 0 !important; min-height: 0 !important; padding: clamp(6px, .55vw, 10px) !important; overflow: hidden !important; }
+  body.tv-mode #panel-painel .topic-pill__count { font-size: clamp(24px, 2.4vw, 40px) !important; line-height: .98 !important; }
+  body.tv-mode #panel-painel .topic-pill__label { display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; overflow-wrap: anywhere !important; font-size: clamp(10px, .9vw, 15px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .topic-pill__breakdown { display: flex !important; flex-wrap: nowrap !important; gap: clamp(4px, .5vw, 8px) !important; font-size: clamp(9px, .72vw, 12px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .topic-pill__breakdown span { white-space: nowrap !important; }
+  body.tv-mode #panel-painel .tv-agent-tma-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: clamp(5px, .5vw, 9px) !important; }
+  body.tv-mode #panel-painel .tv-agent-tma-item { padding: clamp(6px, .55vw, 10px) !important; gap: 3px !important; overflow: hidden !important; }
+  body.tv-mode #panel-painel .tv-agent-tma-item__name { font-size: clamp(10px, .85vw, 14px) !important; line-height: 1.1 !important; }
+  body.tv-mode #panel-painel .tv-agent-tma-item__time { font-size: clamp(19px, 1.8vw, 30px) !important; line-height: 1 !important; }
+  body.tv-mode #panel-painel .tv-agent-tma-item__detail,
+  body.tv-mode #panel-painel .tv-agent-tma-item__subject { font-size: clamp(10px, .78vw, 13px) !important; line-height: 1.1 !important; }
+  /* Se as duas seções extras estiverem ativas, elas dividem a faixa inferior. */
+  body.tv-mode #panel-painel #topicsCard[style*="display: block"] + #tvAgentTmaCard { max-height: 15vh !important; }
+}
+@media (max-width: 760px), (orientation: portrait) {
+  body.tv-mode { height: auto !important; min-height: 100dvh !important; overflow: auto !important; }
+  body.tv-mode .page { height: auto !important; min-height: 100dvh !important; overflow: visible !important; }
+  body.tv-mode #panel-painel { height: auto !important; overflow: visible !important; }
+  body.tv-mode #panel-painel .grid-top { flex: 0 0 auto !important; grid-template-columns: minmax(0, 1fr) !important; }
+  body.tv-mode #panel-painel .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; grid-template-rows: auto !important; }
+  body.tv-mode #panel-painel #topicsCard, body.tv-mode #panel-painel #tvAgentTmaCard { max-height: none !important; overflow: visible !important; }
+  body.tv-mode #panel-painel .topics-grid, body.tv-mode #panel-painel .tv-agent-tma-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+</style>
+
 </head>
 <body>
 <div id="polaris-auth-gate" class="polaris-auth-gate">
@@ -2157,7 +2252,7 @@ function renderTopicsCard(filaRows, attendanceRows, settings) {
   visible.forEach((item) => {
     const total = item.queue + item.attendance;
     const pill = document.createElement("div");
-    pill.className = "topic-pill" + (item.key !== "outros" && total >= 3 ? " topic-pill--critical" : "");
+    pill.className = "topic-pill" + (item.key !== "outros" && total > 5 ? " topic-pill--critical" : "");
     const label = SUBJECT_CATEGORY_LABEL[item.key] || item.key;
     pill.innerHTML = `<span class="topic-pill__count">${total}</span><span class="topic-pill__label">${escapeHtml(label)}</span><span class="topic-pill__breakdown"><span>Fila: ${item.queue}</span><span>Atend.: ${item.attendance}</span></span>`;
     grid.appendChild(pill);
